@@ -4294,17 +4294,192 @@ function processXL(file){
   reader.onload=e=>{
     try{
       const wb=XLSX.read(e.target.result,{type:'binary'});
-      let c={txns:0,accounts:0,goals:0,loans:0,budgets:0};
-      if(wb.SheetNames.includes('Accounts')){XLSX.utils.sheet_to_json(wb.Sheets['Accounts']).forEach(r=>{const name=(r['Account Name']||'').trim();if(!name||S.accounts.find(a=>a.name.toLowerCase()===name.toLowerCase()))return;S.accounts.push({id:S.nAcc++,name,type:r['Account Type']||'Savings Account',balance:parseFloat(r['Opening Balance (₹)'])||0,icon:r['Icon (emoji)']||'',theme:S.nAcc%8});c.accounts++;});}
-      if(wb.SheetNames.includes('Goals & Loans')){XLSX.utils.sheet_to_json(wb.Sheets['Goals & Loans']).forEach(r=>{const name=(r['Name']||'').trim();if(!name)return;const type=(r['Type (goal/loan)']||'goal').toLowerCase();if(type==='loan'){S.loans.push({id:S.nLoan++,name,total:parseFloat(r['Target Amount (₹)'])||0,paid:parseFloat(r['Current/Paid (₹)'])||0,emi:parseFloat(r['Monthly Target (₹)'])||0,rate:0,lender:'',date:r['Due Date']||''});c.loans++;}else{S.goals.push({id:S.nGoal++,name,target:parseFloat(r['Target Amount (₹)'])||0,saved:parseFloat(r['Current/Paid (₹)'])||0,monthly:parseFloat(r['Monthly Target (₹)'])||0,date:r['Due Date']||'',notes:r['Notes']||''});c.goals++;}});}
-      if(wb.SheetNames.includes('Budgets')){XLSX.utils.sheet_to_json(wb.Sheets['Budgets']).forEach(r=>{const cat=S.categories.find(x=>x.name.toLowerCase()===(r['Category']||'').trim().toLowerCase());if(!cat)return;const amt=parseFloat(r['Monthly Budget (₹)'])||0;if(!amt)return;const ex=S.budgets.findIndex(b=>b.catId===cat.id);if(ex>=0)S.budgets[ex].amount=amt;else{S.budgets.push({id:S.nBgt++,catId:cat.id,amount:amt,alert_pct:parseInt(r['Alert at (%)'])||80});c.budgets++;}});}
-      const tsn=wb.SheetNames.find(n=>n.toLowerCase().includes('transaction'));
-      if(tsn){XLSX.utils.sheet_to_json(wb.Sheets[tsn]).forEach(r=>{const amt=parseFloat(r['Amount (₹)'])||0;if(!amt)return;let dateRaw=r['Date'],date='';if(typeof dateRaw==='number'){const d=XLSX.SSF.parse_date_code(dateRaw);date=`${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;}else date=String(dateRaw||'').trim();if(!date)return;const type=(r['Type']||'expense').toLowerCase().trim();const acc=S.accounts.find(a=>a.name.toLowerCase()===(r['Account']||'').trim().toLowerCase())||S.accounts[0];const cat=S.categories.find(c=>c.name.toLowerCase()===(r['Category']||'').trim().toLowerCase()&&c.type===type)||S.categories.find(c=>c.type===type);S.transactions.push({id:S.nTxn++,type,amount:amt,date,desc:(r['Description']||r['Category']||'Transaction').trim(),accId:acc?.id,catId:cat?.id,catName:cat?.name,catIcon:cat?.icon,catColor:cat?.color,accName:acc?.name});if(acc)acc.balance+=type==='income'?amt:-amt;c.txns++;});S.transactions.sort((a,b)=>b.date.localeCompare(a.date));}
-      document.getElementById('import-msg').textContent=`✓ Imported — Transactions: ${c.txns}  Accounts: ${c.accounts}  Goals: ${c.goals}  Loans: ${c.loans}  Budgets: ${c.budgets}`;
-      document.getElementById('import-msg').className='import-msg ok';document.getElementById('import-msg').style.display='block';
-      setTimeout(()=>document.getElementById('import-msg').style.display='none',9000);
-      refreshDash();saveData();
-    }catch(err){document.getElementById('import-msg').textContent='Import failed: '+err.message;document.getElementById('import-msg').className='import-msg err';document.getElementById('import-msg').style.display='block';}
+      const sn=wb.SheetNames; // available sheet names
+      const get=name=>wb.Sheets[sn.find(n=>n.toLowerCase()===name.toLowerCase())];
+      const getPartial=part=>wb.Sheets[sn.find(n=>n.toLowerCase().includes(part.toLowerCase()))];
+      let c={txns:0,accounts:0,goals:0,loans:0,budgets:0,categories:0};
+
+      // helper: parse a date cell which may be a number (Excel serial) or string
+      function parseDate(raw){
+        if(!raw) return '';
+        if(typeof raw==='number'){
+          const d=XLSX.SSF.parse_date_code(raw);
+          return `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;
+        }
+        return String(raw).trim();
+      }
+
+      // ── 1. CATEGORIES ──
+      // Reads from 'Categories' sheet (exported by exportAll)
+      // Columns: Category Name, Type, (Color optional)
+      const catSheet = get('Categories');
+      if(catSheet){
+        XLSX.utils.sheet_to_json(catSheet).forEach(r=>{
+          const name = (r['Category Name']||r['Name']||'').trim();
+          const type = (r['Type']||'expense').toLowerCase().trim();
+          if(!name) return;
+          if(S.categories.find(x=>x.name.toLowerCase()===name.toLowerCase()&&x.type===type)) return; // skip duplicate
+          S.categories.push({
+            id:S.nCat++, name,
+            type: type==='income'?'income':'expense',
+            color: r['Color']||r['color']||'rgba(200,200,200,0.55)',
+          });
+          c.categories++;
+        });
+      }
+
+      // ── 2. ACCOUNTS ──
+      // Supports both template columns ('Account Type','Opening Balance (₹)')
+      // and exportAll columns ('Type','Current Balance (₹)')
+      const accSheet = get('Accounts') || get('Account Balances');
+      if(accSheet){
+        XLSX.utils.sheet_to_json(accSheet).forEach(r=>{
+          const name=(r['Account Name']||'').trim();
+          if(!name) return;
+          if(name==='TOTAL NET WORTH'||name==='Total Net Worth') return; // skip summary row
+          if(S.accounts.find(a=>a.name.toLowerCase()===name.toLowerCase())) return; // skip duplicate
+          const type = r['Account Type']||r['Type']||'Savings Account';
+          const bal  = parseFloat(r['Opening Balance (₹)']||r['Current Balance (₹)']||r['Balance']||0)||0;
+          S.accounts.push({id:S.nAcc++, name, type, balance:bal, icon:'', theme:S.nAcc%8});
+          c.accounts++;
+        });
+      }
+
+      // ── 3. GOALS ──
+      // Reads from 'Goals' sheet (exportAll) OR 'Goals & Loans' (template)
+      const goalsSheet = get('Goals') || get('Goals & Loans');
+      if(goalsSheet){
+        XLSX.utils.sheet_to_json(goalsSheet).forEach(r=>{
+          // template format has 'Type (goal/loan)'; exportAll Goals sheet has no type col (all goals)
+          const type=(r['Type (goal/loan)']||r['Type']||'goal').toLowerCase().trim();
+          const name=(r['Goal Name']||r['Name']||'').trim();
+          if(!name||name.startsWith('No goals')) return;
+          if(type.includes('loan')) return; // loans handled separately
+          if(S.goals.find(g=>g.name.toLowerCase()===name.toLowerCase())) return; // skip duplicate
+          S.goals.push({
+            id:S.nGoal++, name,
+            target : parseFloat(r['Target (₹)']||r['Target Amount (₹)']||0)||0,
+            saved  : parseFloat(r['Saved (₹)']||r['Current/Paid (₹)']||0)||0,
+            monthly: parseFloat(r['Monthly Target (₹)']||r['Monthly (₹)']||0)||0,
+            date   : parseDate(r['Due Date'])||'',
+            notes  : r['Notes']||'',
+          });
+          c.goals++;
+        });
+      }
+
+      // ── 4. LOANS ──
+      // Reads from 'Loans & EMI' sheet (exportAll) OR 'Goals & Loans' (template)
+      const loansSheet = get('Loans & EMI') || get('Loans') || goalsSheet;
+      if(loansSheet){
+        XLSX.utils.sheet_to_json(loansSheet).forEach(r=>{
+          // For combined Goals & Loans sheet — filter to loan type only
+          const sheetName = sn.find(n=>wb.Sheets[n]===loansSheet)||'';
+          const isCombo   = sheetName.toLowerCase().includes('goals');
+          if(isCombo){
+            const type=(r['Type (goal/loan)']||'').toLowerCase();
+            if(!type.includes('loan')) return;
+          }
+          const name=(r['Loan Name']||r['Name']||'').trim();
+          if(!name||name.startsWith('No loans')) return;
+          if(S.loans.find(l=>l.name.toLowerCase()===name.toLowerCase())) return; // skip duplicate
+          S.loans.push({
+            id:S.nLoan++, name,
+            lender   : r['Lender']||'',
+            total    : parseFloat(r['Total Loan (₹)']||r['Total (₹)']||r['Target Amount (₹)']||0)||0,
+            paid     : parseFloat(r['Paid Amount (₹)']||r['Paid (₹)']||r['Current/Paid (₹)']||0)||0,
+            emi      : parseFloat(r['Monthly EMI (₹)']||r['EMI (₹)']||r['Monthly Target (₹)']||0)||0,
+            rate     : parseFloat(r['Interest Rate (%)']||r['Rate (% p.a.)']||0)||0,
+            fee      : parseFloat(r['Processing Fee (₹)']||0)||0,
+            emisPaid : parseInt(r['EMIs Paid']||0)||0,
+            totalEmis: parseInt(r['Total EMIs']||0)||0,
+            startDate: parseDate(r['Start Date'])||'',
+            date     : parseDate(r['End Date']||r['Due Date'])||'',
+          });
+          c.loans++;
+        });
+      }
+
+      // ── 5. BUDGETS ──
+      // Supports both template ('Monthly Budget (₹)') and exportAll ('Monthly Limit (₹)')
+      const bgtSheet = get('Budgets');
+      if(bgtSheet){
+        XLSX.utils.sheet_to_json(bgtSheet).forEach(r=>{
+          const catName=(r['Category']||'').trim();
+          if(!catName||catName==='No budgets set') return;
+          const cat=S.categories.find(x=>x.name.toLowerCase()===catName.toLowerCase());
+          if(!cat) return; // category must exist first
+          const amt=parseFloat(r['Monthly Budget (₹)']||r['Monthly Limit (₹)']||r['Budget']||0)||0;
+          if(!amt) return;
+          const alertPct=parseInt(r['Alert at (%)']||r['Alert At (%)']||80)||80;
+          const ex=S.budgets.findIndex(b=>b.catId===cat.id);
+          if(ex>=0){ S.budgets[ex].amount=amt; S.budgets[ex].alert_pct=alertPct; }
+          else{ S.budgets.push({id:S.nBgt++,catId:cat.id,amount:amt,alert_pct:alertPct}); c.budgets++; }
+        });
+      }
+
+      // ── 6. TRANSACTIONS ──
+      // Supports both exportAll columns and template columns
+      const txnSheet = getPartial('transaction');
+      if(txnSheet){
+        XLSX.utils.sheet_to_json(txnSheet).forEach(r=>{
+          const amt=parseFloat(r['Amount (₹)']||r['Amount']||0)||0;
+          if(!amt) return;
+          const date=parseDate(r['Date']);
+          if(!date) return;
+          const type=(r['Type']||'expense').toLowerCase().trim();
+          if(type!=='income'&&type!=='expense') return; // skip header rows
+          const desc=(r['Description']||r['Category']||'Transaction').trim();
+          // Account: match by name, fallback to first account
+          const accName=(r['Account']||'').trim();
+          const acc=S.accounts.find(a=>a.name.toLowerCase()===accName.toLowerCase())||S.accounts[0];
+          // Category: match by name + type, then by name only, then by type
+          const catName=(r['Category']||'').trim();
+          const cat=S.categories.find(x=>x.name.toLowerCase()===catName.toLowerCase()&&x.type===type)
+                  ||S.categories.find(x=>x.name.toLowerCase()===catName.toLowerCase())
+                  ||S.categories.find(x=>x.type===type);
+          // Skip duplicates: same date + amount + desc + type
+          const isDuplicate=S.transactions.some(t=>t.date===date&&t.amount===amt&&t.type===type&&t.desc===desc);
+          if(isDuplicate) return;
+          S.transactions.push({
+            id:S.nTxn++, type, amount:amt, date, desc,
+            accId:acc?.id, catId:cat?.id,
+            catName:cat?.name, catIcon:cat?.icon, catColor:cat?.color,
+            accName:acc?.name
+          });
+          if(acc) acc.balance+=type==='income'?amt:-amt;
+          c.txns++;
+        });
+        S.transactions.sort((a,b)=>b.date.localeCompare(a.date));
+      }
+
+      // ── Result ──
+      const parts=[
+        c.txns       ?c.txns+' transactions':'',
+        c.accounts   ?c.accounts+' accounts':'',
+        c.categories ?c.categories+' categories':'',
+        c.goals      ?c.goals+' goals':'',
+        c.loans      ?c.loans+' loans':'',
+        c.budgets    ?c.budgets+' budgets':'',
+      ].filter(Boolean);
+      const msg = document.getElementById('import-msg');
+      if(parts.length){
+        msg.textContent='✓ Imported — '+parts.join(' · ');
+        msg.className='import-msg ok';
+      } else {
+        msg.textContent='⚠ Nothing new imported. Check sheet names and column headers match the template.';
+        msg.className='import-msg err';
+      }
+      msg.style.display='block';
+      setTimeout(()=>msg.style.display='none',9000);
+      refreshDash();renderTxns();renderAccounts();renderCats();renderBudgets();renderGoals();renderLoans();saveData();
+    }catch(err){
+      const msg=document.getElementById('import-msg');
+      msg.textContent='Import failed: '+err.message;
+      msg.className='import-msg err';
+      msg.style.display='block';
+      console.error('Import error:',err);
+    }
   };reader.readAsBinaryString(file);
 }
 // ══════════════════════════════════════
