@@ -1439,25 +1439,28 @@ body.light-mode .fmh-8 { fill: #212121 !important; }
     </div>
 
     <div class="signin-h">Welcome back</div>
-    <div class="signin-sub">Your data is saved privately to your Google Drive — synced across all your devices automatically. No data is stored in the browser.</div>
+    <div class="signin-sub">Track your money, budgets, goals and loans — all in one place.<br>Sign in with Google to sync across <strong style='color:var(--red)'>all your devices</strong> automatically.</div>
 
-    <!-- ── GOOGLE SIGN-IN (required) ── -->
-    <div id="g-signin-wrap" style="margin-bottom:16px;">
+    <!-- ── GOOGLE SIGN-IN (real OAuth) ── -->
+    <div id="g-signin-wrap" style="margin-bottom:10px;">
       <div id="g-btn-container" style="display:flex;justify-content:center;min-height:44px;"></div>
-      <div id="g-error" style="display:none;margin-top:10px;padding:11px 14px;border-radius:12px;background:rgba(220,38,38,0.12);border:1px solid rgba(220,38,38,0.25);font-size:13px;color:#ff8888;text-align:center;line-height:1.5;"></div>
+      <div id="g-error" style="display:none;margin-top:8px;padding:9px 12px;border-radius:8px;background:rgba(255,100,100,0.15);border:1px solid rgba(255,100,100,0.3);font-size:12px;color:#ffaaaa;text-align:center;"></div>
     </div>
 
-    <!-- Drive info strip -->
-    <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:14px;background:rgba(22,163,74,0.06);border:1px solid rgba(22,163,74,0.18);margin-bottom:8px;">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      <div>
-        <div style="font-size:12px;font-weight:700;color:#16A34A;">Stored in your Google Drive</div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:1px;">Private AppData folder · Only you can access it</div>
-      </div>
+    <div class="signin-divider">or enter your name</div>
+
+    <!-- Name fallback — works offline -->
+    <div class="signin-name-row">
+      <label>Your Name</label>
+      <input type="text" id="si-name" placeholder="e.g. Alex Paul" onkeydown="if(event.key==='Enter')signInWithName()">
     </div>
+    <button class="signin-btn signin-btn-go" onclick="signInWithName()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      Get Started
+    </button>
 
     <div class="signin-footer">
-      FinTrack v1.0 &nbsp;·&nbsp; Data saved to your Google Drive &nbsp;·&nbsp; Zero local storage
+      FinTrack v1.0 &nbsp;·&nbsp; All data stored locally &nbsp;·&nbsp; Nothing sent to any server
     </div>
   </div>
 </div>
@@ -2039,7 +2042,7 @@ body.light-mode .fmh-8 { fill: #212121 !important; }
 //     Enable Google Drive API + add your site to allowed origins
 // ─────────────────────────────────────────────────────────
 const GOOGLE_CLIENT_ID = '1019261366232-bed5oaf8pru1hlel7gh4la2o239siqbt.apps.googleusercontent.com';
-const DRIVE_SCOPE    = 'https://www.googleapis.com/auth/drive.appdata';
+const DRIVE_SCOPE    = 'https://www.googleapis.com/auth/drive.file';
 const DRIVE_FILENAME = 'fintrack-data.json';
 let driveAccessToken = null;
 let driveFileId      = null;
@@ -2139,9 +2142,9 @@ function silentRefreshDrive(name, email, picture){
 }
 
 function signInWithName(){
-  // Name-only sign-in disabled — Google Drive required for data storage
-  const errEl = document.getElementById('g-error');
-  if(errEl){ errEl.textContent = 'Please sign in with Google to save your data.'; errEl.style.display='block'; }
+  const name = document.getElementById('si-name').value.trim();
+  if(!name){ document.getElementById('si-name').focus(); return; }
+  doSignIn(name);
 }
 
 function signInWithPhone(){
@@ -2189,14 +2192,15 @@ function doSignIn(name, email='', picture='', provider=''){
 
   document.getElementById('hero-name').textContent = greeting() + ', ' + first + '!';
   
-  // Load data from Google Drive
   updateSyncBadge('connecting');
+  // Load data — Drive if Google, localStorage if name-only
   loadData().then(hadData => {
     refreshDash();
+    const src = (provider === 'google' && driveAccessToken) ? '☁️ Google Drive synced' : '💾 Local data loaded';
     if(!hadData){
       setTimeout(()=>toast('Welcome to FinTrack, '+first+'! Add your first account.'),600);
     } else {
-      setTimeout(()=>toast('Welcome back, '+first+'! Drive synced ✓'),400);
+      setTimeout(()=>toast('Welcome back, '+first+'! ✓ '+src),400);
     }
   });
 }
@@ -2223,13 +2227,13 @@ window.addEventListener('load', initGoogleSignIn);
 
 // ── Save on tab close — local backup always, Drive saves are real-time ──
 window.addEventListener('beforeunload', function(){
-  // Drive saves are real-time (debounced 1s). Nothing to do on close.
+  if(currentUser) saveLocalBackup();
 });
 
 // ── Auto-sync to Drive every 90 seconds as safety net ──
 setInterval(function(){
   if(currentUser && driveAccessToken) driveSave();
-  // No localStorage fallback — Drive only
+  else if(currentUser) saveLocalBackup();
 }, 90000);
 
 
@@ -2262,9 +2266,9 @@ async function driveRequest(method, url, body=null){
 // ── Find or create fintrack-data.json in Drive AppData ──
 async function driveGetFileId(){
   if(driveFileId) return driveFileId;
-  const q = encodeURIComponent(`name='${DRIVE_FILENAME}' and spaces='appDataFolder' and trashed=false`);
+  const q = encodeURIComponent(`name='${DRIVE_FILENAME}' and trashed=false`);
   const list = await driveRequest('GET',
-    `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=${q}&fields=files(id,name)`);
+    `https://www.googleapis.com/drive/v3/files?spaces=drive&q=${q}&fields=files(id,name)`);
   if(list.files && list.files.length > 0){
     driveFileId = list.files[0].id;
     return driveFileId;
@@ -2272,7 +2276,7 @@ async function driveGetFileId(){
   // Create new empty file
   const created = await driveRequest('POST',
     'https://www.googleapis.com/drive/v3/files?fields=id',
-    { name: DRIVE_FILENAME, parents: ['appDataFolder'] });
+    { name: DRIVE_FILENAME });
   driveFileId = created.id;
   return driveFileId;
 }
@@ -2290,6 +2294,7 @@ async function driveLoad(){
     const text = await res.text();
     if(!text || !text.trim()) return false;
     applyData(JSON.parse(text));
+    saveLocalBackup();
     updateSyncBadge('synced');
     return true;
   } catch(e){
@@ -2355,17 +2360,27 @@ ${payload}
       `https://www.googleapis.com/upload/drive/v3/files/${fid}?uploadType=multipart`,
       { method:'PATCH', headers:{ Authorization:'Bearer '+driveAccessToken, 'Content-Type':`multipart/related; boundary=${boundary}` }, body }
     );
+    saveLocalBackup();
     updateSyncBadge('synced');
   } catch(e){
     console.warn('Drive save failed:', e);
+    saveLocalBackup();
     updateSyncBadge('error');
   }
 }
 
-// ── localStorage disabled — all data stored in Google Drive only ──
+// ── localStorage backup ──
 function saveLocalBackup(){
-  // Intentionally empty — we do NOT write user data to localStorage.
-  // All persistence goes through Google Drive (driveSave / _doDriveSave).
+  try{
+    localStorage.setItem(localKey(), JSON.stringify({
+      accounts:S.accounts, transactions:S.transactions,
+      budgets:S.budgets, goals:S.goals, loans:S.loans,
+      categories:S.categories,
+      nAcc:S.nAcc, nTxn:S.nTxn, nCat:S.nCat,
+      nBgt:S.nBgt, nGoal:S.nGoal, nLoan:S.nLoan,
+      savedAt: new Date().toISOString(),
+    }));
+  } catch(e){}
 }
 
 // ── Sync status indicator in navbar ──
@@ -2373,44 +2388,44 @@ function updateSyncBadge(state){
   const el = document.getElementById('sync-badge');
   if(!el) return;
   const map = {
-    synced: {dot:'#16A34A', text:'Drive synced ✓'},
-    saving: {dot:'#F0AB00', text:'Saving to Drive…'},
-    offline:{dot:'#DC2626', text:'Not connected'},
-    error:  {dot:'#DC2626', text:'Drive error'},
-    connecting:{dot:'#F0AB00', text:'Connecting…'},
+    synced:     {dot:'#16A34A', text:'Drive synced ✓'},
+    saving:     {dot:'#F0AB00', text:'Saving to Drive…'},
+    offline:    {dot:'#9ca3af', text:'Local only'},
+    error:      {dot:'#DC2626', text:'Sync error'},
+    connecting: {dot:'#F0AB00', text:'Connecting…'},
   };
   const s = map[state]||map.offline;
   el.innerHTML = `<span style="width:7px;height:7px;border-radius:50%;background:${s.dot};display:inline-block;flex-shrink:0;"></span><span>${s.text}</span>`;
 }
 
-// ── Main loadData — Google Drive only ──
+// ── Main loadData (async) ──
 async function loadData(){
-  if(!driveAccessToken){
-    // No Drive token — can't load data. User must sign in with Google.
-    updateSyncBadge('error');
-    return false;
+  if(driveAccessToken){
+    const ok = await driveLoad();
+    if(ok) return true;
+    // Drive empty — check localStorage for migrated data
   }
-  const ok = await driveLoad();
-  if(ok) return true;
-  // Drive returned nothing — new user or empty account. That's fine.
-  updateSyncBadge('synced');
-  return false;
+  // localStorage fallback
+  try{
+    const raw = localStorage.getItem(localKey());
+    if(!raw) return false;
+    applyData(JSON.parse(raw));
+    updateSyncBadge('offline');
+    return true;
+  } catch(e){ return false; }
 }
 
-// ── saveData — Google Drive only ──
+// ── saveData — called from all edit operations ──
 function saveData(){
-  if(driveAccessToken){
-    driveSave();
-  } else {
-    // No Drive token — show warning, do NOT save locally
-    updateSyncBadge('error');
-    console.warn('FinTrack: Cannot save — no Google Drive token. Please sign out and sign in with Google.');
-  }
+  if(driveAccessToken) driveSave();
+  else saveLocalBackup();
 }
 
 // ── clearData ──
 function clearData(){
+  try{ localStorage.removeItem(localKey()); } catch(e){}
   if(driveAccessToken){
+    // Write empty snapshot to Drive
     S.accounts=[];S.transactions=[];S.categories=[];S.budgets=[];S.goals=[];S.loans=[];
     S.nAcc=1;S.nTxn=1;S.nCat=1;S.nBgt=1;S.nGoal=1;S.nLoan=1;
     driveSave();
@@ -4699,7 +4714,6 @@ function escHtml(t){
 /* ── THEME TOGGLE ── */
 (function(){
   // Restore saved preference
-  // Theme preference (not user data) — safe to store in localStorage
   const saved = localStorage.getItem('ft-theme');
   if(saved === 'light') document.body.classList.add('light-mode');
   updateThemeUI();
