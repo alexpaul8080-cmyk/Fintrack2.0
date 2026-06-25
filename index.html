@@ -4318,115 +4318,221 @@ function downloadTemplate(){
 // EXPORT ALL DATA
 // ══════════════════════════════════════
 function exportAll(){
-  if(!S.transactions.length && !S.accounts.length){toast('No data to export yet','red');return;}
-  const wb = XLSX.utils.book_new();
-  const now = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  if(!S.transactions.length && !S.accounts.length && !S.goals.length && !S.loans.length){
+    toast('No data to export yet','red'); return;
+  }
+  const wb   = XLSX.utils.book_new();
+  const now  = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  const ym   = new Date().toISOString().slice(0,7);
 
-  // ── Transactions sheet ──
-  const txnRows = [['#','Date','Type','Amount (₹)','Description','Category','Account','Notes']];
+  // ── helpers ──
+  const allInc = S.transactions.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const allExp = S.transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const netWorth = S.accounts.reduce((s,a)=>s+a.balance,0);
+
+  // ════════════════════════════════════════
+  // SHEET 1 — SUMMARY (first tab for overview)
+  // ════════════════════════════════════════
+  const sumRows = [
+    ['FinTrack — Complete Data Export',''],
+    ['Exported on', now],['User', currentUser?.name||''],['Email', currentUser?.email||''],
+    ['',''],
+    ['── OVERVIEW ──',''],
+    ['Total Income (₹)', allInc],
+    ['Total Expenses (₹)', allExp],
+    ['Net Savings (₹)', Math.max(allInc-allExp,0)],
+    ['Savings Rate', allInc>0?(Math.round((allInc-allExp)/allInc*100)+'%'):'0%'],
+    ['Total Net Worth (₹)', netWorth],
+    ['',''],
+    ['── COUNTS ──',''],
+    ['Transactions', S.transactions.length],
+    ['Accounts', S.accounts.length],
+    ['Budget Categories', S.budgets.length],
+    ['Savings Goals', S.goals.length],
+    ['Active Loans', S.loans.length],
+    ['Categories', S.categories.length],
+    ['',''],
+    ['── THIS MONTH ('+ym+') ──',''],
+  ];
+  const mTxns = S.transactions.filter(t=>t.date.startsWith(ym));
+  const mInc  = mTxns.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const mExp  = mTxns.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  sumRows.push(['Income this month (₹)', mInc]);
+  sumRows.push(['Expenses this month (₹)', mExp]);
+  sumRows.push(['Net this month (₹)', mInc-mExp]);
+  sumRows.push(['Transactions this month', mTxns.length]);
+  const wsSum = XLSX.utils.aoa_to_sheet(sumRows);
+  wsSum['!cols'] = [{wch:30},{wch:26}];
+  XLSX.utils.book_append_sheet(wb, wsSum, 'Summary');
+
+  // ════════════════════════════════════════
+  // SHEET 2 — TRANSACTIONS (all, sorted by date)
+  // ════════════════════════════════════════
+  const txnRows = [['#','Date','Day','Type','Amount (₹)','Description','Category','Cat Type','Account','Running Balance']];
+  let runBal = 0;
   [...S.transactions].sort((a,b)=>a.date.localeCompare(b.date)).forEach((t,i)=>{
+    runBal += t.type==='income' ? t.amount : -t.amount;
+    const day = new Date(t.date).toLocaleDateString('en-IN',{weekday:'short'});
     txnRows.push([
-      i+1,
-      t.date,
-      t.type,
-      t.amount,
-      t.desc||'',
-      t.catName||'',
-      t.accName||'',
-      ''
+      i+1, t.date, day, t.type, t.amount,
+      t.desc||'', t.catName||'—',
+      S.categories.find(c=>c.id===t.catId)?.type||'',
+      t.accName||'—', runBal
     ]);
   });
   const wsTxn = XLSX.utils.aoa_to_sheet(txnRows);
-  wsTxn['!cols'] = [{wch:5},{wch:14},{wch:10},{wch:14},{wch:32},{wch:24},{wch:18},{wch:20}];
+  wsTxn['!cols'] = [{wch:5},{wch:14},{wch:7},{wch:10},{wch:14},{wch:32},{wch:24},{wch:10},{wch:20},{wch:18}];
   XLSX.utils.book_append_sheet(wb, wsTxn, 'Transactions');
 
-  // ── Account Balances sheet ──
-  const accRows = [['Account Name','Type','Current Balance (₹)']];
-  S.accounts.forEach(a=>{accRows.push([a.name, a.type, a.balance]);});
-  accRows.push(['','','']);
-  accRows.push(['Total Net Worth','',S.accounts.reduce((s,a)=>s+a.balance,0)]);
-  const wsAcc = XLSX.utils.aoa_to_sheet(accRows);
-  wsAcc['!cols'] = [{wch:22},{wch:22},{wch:20}];
-  XLSX.utils.book_append_sheet(wb, wsAcc, 'Account Balances');
-
-  // ── Budgets sheet ──
-  if(S.budgets.length){
-    const bgtRows = [['Category','Type','Monthly Budget (₹)','Spent This Month (₹)','Remaining (₹)','Exceeded (₹)','Alert at (%)','Status']];
-    S.budgets.forEach(b=>{
-      const cat = S.categories.find(c=>c.id===b.catId)||{name:'Unknown'};
-      const spent = spentThisMonth(b.catId);
-      const rem = Math.max(b.amount-spent,0);
-      const exc = Math.max(spent-b.amount,0);
-      const pct = b.amount>0?Math.round(spent/b.amount*100):0;
-      const status = pct>=100?'Over budget':pct>=b.alert_pct?'Alert threshold':'On track';
-      bgtRows.push([cat.name,'expense',b.amount,spent,rem,exc,b.alert_pct,status]);
-    });
-    const wsBgt = XLSX.utils.aoa_to_sheet(bgtRows);
-    wsBgt['!cols'] = [{wch:26},{wch:10},{wch:20},{wch:22},{wch:18},{wch:16},{wch:12},{wch:16}];
-    XLSX.utils.book_append_sheet(wb, wsBgt, 'Budgets');
-  }
-
-  // ── Goals sheet ──
-  if(S.goals.length){
-    const goalRows = [['Goal Name','Target (₹)','Saved (₹)','Remaining (₹)','Progress (%)','Monthly Target (₹)','Due Date','Notes']];
-    S.goals.forEach(g=>{
-      const pct = g.target>0?Math.min(Math.round(g.saved/g.target*100),100):0;
-      goalRows.push([g.name,g.target,g.saved,Math.max(g.target-g.saved,0),pct+'%',g.monthly||'',g.date||'',g.notes||'']);
-    });
-    const wsGoal = XLSX.utils.aoa_to_sheet(goalRows);
-    wsGoal['!cols'] = [{wch:26},{wch:14},{wch:14},{wch:14},{wch:14},{wch:20},{wch:14},{wch:28}];
-    XLSX.utils.book_append_sheet(wb, wsGoal, 'Goals');
-  }
-
-  // ── Loans sheet ──
-  if(S.loans.length){
-    const loanRows = [['Loan Name','Lender','Total (₹)','Paid (₹)','Outstanding (₹)','EMI (₹)','Rate (% p.a.)','Months Left','End Date']];
-    S.loans.forEach(l=>{
-      const out = Math.max(l.total-l.paid,0);
-      const mLeft = l.emi>0&&out>0?Math.ceil(out/l.emi):'';
-      loanRows.push([l.name,l.lender||'',l.total,l.paid,out,l.emi||'',l.rate||'',mLeft,l.date||'']);
-    });
-    const wsLoan = XLSX.utils.aoa_to_sheet(loanRows);
-    wsLoan['!cols'] = [{wch:28},{wch:16},{wch:14},{wch:14},{wch:16},{wch:12},{wch:14},{wch:14},{wch:14}];
-    XLSX.utils.book_append_sheet(wb, wsLoan, 'Loans');
-  }
-
-  // ── Category Summary sheet ──
-  const catRows = [['Category','Type','Total Spent (₹)','No. of Transactions']];
-  S.categories.forEach(c=>{
-    const txns = S.transactions.filter(t=>t.catId===c.id);
-    const total = txns.reduce((s,t)=>s+t.amount,0);
-    if(total>0||txns.length>0) catRows.push([c.name,c.type,total,txns.length]);
+  // ════════════════════════════════════════
+  // SHEET 3 — ACCOUNTS
+  // ════════════════════════════════════════
+  const accRows = [['#','Account Name','Type','Current Balance (₹)','Total In (₹)','Total Out (₹)','No. of Transactions']];
+  S.accounts.forEach((a,i)=>{
+    const aTxns = S.transactions.filter(t=>t.accId===a.id);
+    const aIn   = aTxns.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+    const aOut  = aTxns.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+    accRows.push([i+1, a.name, a.type, a.balance, aIn, aOut, aTxns.length]);
   });
+  accRows.push(['','','','','','','']);
+  accRows.push(['','TOTAL NET WORTH','',netWorth,'','','']);
+  const wsAcc = XLSX.utils.aoa_to_sheet(accRows);
+  wsAcc['!cols'] = [{wch:5},{wch:24},{wch:22},{wch:22},{wch:16},{wch:16},{wch:20}];
+  XLSX.utils.book_append_sheet(wb, wsAcc, 'Accounts');
+
+  // ════════════════════════════════════════
+  // SHEET 4 — BUDGETS (current month + all time)
+  // ════════════════════════════════════════
+  const bgtRows = [['#','Category','Monthly Limit (₹)','Spent This Month (₹)','Remaining (₹)','Exceeded (₹)','Used (%)','Alert At (%)','Status','All Time Spent (₹)','All Time Txns']];
+  S.budgets.forEach((b,i)=>{
+    const cat     = S.categories.find(c=>c.id===b.catId)||{name:'Unknown'};
+    const spent   = spentThisMonth(b.catId);
+    const allSpent= S.transactions.filter(t=>t.catId===b.catId&&t.type==='expense').reduce((s,t)=>s+t.amount,0);
+    const allTxns = S.transactions.filter(t=>t.catId===b.catId).length;
+    const rem     = Math.max(b.amount-spent,0);
+    const exc     = Math.max(spent-b.amount,0);
+    const pct     = b.amount>0?Math.round(spent/b.amount*100):0;
+    const status  = pct>=100?'Over budget':pct>=(b.alert_pct||80)?'Alert threshold':'On track';
+    bgtRows.push([i+1,cat.name,b.amount,spent,rem,exc,pct+'%',b.alert_pct||80,status,allSpent,allTxns]);
+  });
+  if(!S.budgets.length) bgtRows.push(['No budgets set','','','','','','','','','','']);
+  const wsBgt = XLSX.utils.aoa_to_sheet(bgtRows);
+  wsBgt['!cols'] = [{wch:4},{wch:26},{wch:18},{wch:22},{wch:16},{wch:14},{wch:10},{wch:12},{wch:16},{wch:18},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, wsBgt, 'Budgets');
+
+  // ════════════════════════════════════════
+  // SHEET 5 — GOALS
+  // ════════════════════════════════════════
+  const goalRows = [['#','Goal Name','Target (₹)','Saved (₹)','Remaining (₹)','Progress (%)','Monthly Target (₹)','Due Date','Days Left','Status','Notes']];
+  S.goals.forEach((g,i)=>{
+    const pct   = g.target>0?Math.min(Math.round(g.saved/g.target*100),100):0;
+    const dLeft = g.date?Math.ceil((new Date(g.date)-new Date())/864e5):'';
+    const status= pct>=100?'Achieved':dLeft<0?'Overdue':pct>=75?'Almost there':'In progress';
+    goalRows.push([i+1,g.name,g.target,g.saved,Math.max(g.target-g.saved,0),pct+'%',g.monthly||'',g.date||'',dLeft,status,g.notes||'']);
+  });
+  if(!S.goals.length) goalRows.push(['No goals set','','','','','','','','','','']);
+  const wsGoal = XLSX.utils.aoa_to_sheet(goalRows);
+  wsGoal['!cols'] = [{wch:4},{wch:28},{wch:14},{wch:14},{wch:14},{wch:13},{wch:20},{wch:14},{wch:10},{wch:14},{wch:30}];
+  XLSX.utils.book_append_sheet(wb, wsGoal, 'Goals');
+
+  // ════════════════════════════════════════
+  // SHEET 6 — LOANS / EMI
+  // ════════════════════════════════════════
+  const loanRows = [['#','Loan Name','Lender','Total Loan (₹)','EMIs Paid','Total EMIs','Paid Amount (₹)','Outstanding (₹)','Monthly EMI (₹)','Interest Rate (%)','Processing Fee (₹)','Start Date','End Date','Months Left','Status']];
+  S.loans.forEach((l,i)=>{
+    const calcPaid = (l.emisPaid!=null&&l.emi) ? l.emisPaid*l.emi : l.paid;
+    const out      = Math.max(l.total-calcPaid,0);
+    const mLeft    = l.emi>0&&out>0?Math.ceil(out/l.emi):'';
+    const fullyPaid= l.totalEmis&&(l.emisPaid||0)>=l.totalEmis;
+    const status   = fullyPaid?'Fully Paid':out>0?'Active':'Closed';
+    loanRows.push([
+      i+1, l.name, l.lender||'', l.total,
+      l.emisPaid||0, l.totalEmis||'',
+      calcPaid, out,
+      l.emi||'', l.rate||'', l.fee||0,
+      l.startDate||'', l.date||'', mLeft, status
+    ]);
+  });
+  if(!S.loans.length) loanRows.push(['No loans added','','','','','','','','','','','','','','']);
+  const wsLoan = XLSX.utils.aoa_to_sheet(loanRows);
+  wsLoan['!cols'] = [{wch:4},{wch:28},{wch:16},{wch:16},{wch:12},{wch:12},{wch:16},{wch:16},{wch:16},{wch:16},{wch:18},{wch:14},{wch:14},{wch:13},{wch:12}];
+  XLSX.utils.book_append_sheet(wb, wsLoan, 'Loans & EMI');
+
+  // ════════════════════════════════════════
+  // SHEET 7 — CATEGORIES (all with stats)
+  // ════════════════════════════════════════
+  const catRows = [['#','Category Name','Type','Total Amount (₹)','This Month (₹)','No. of Transactions','Last Used','Has Budget','Budget Limit (₹)']];
+  S.categories.forEach((cat,i)=>{
+    const txns    = S.transactions.filter(t=>t.catId===cat.id);
+    const total   = txns.reduce((s,t)=>s+t.amount,0);
+    const mAmt    = txns.filter(t=>t.date.startsWith(ym)).reduce((s,t)=>s+t.amount,0);
+    const last    = txns.length?[...txns].sort((a,b)=>b.date.localeCompare(a.date))[0].date:'';
+    const budget  = S.budgets.find(b=>b.catId===cat.id);
+    catRows.push([i+1,cat.name,cat.type,total,mAmt,txns.length,last,budget?'Yes':'No',budget?budget.amount:'']);
+  });
+  if(!S.categories.length) catRows.push(['No categories','','','','','','','','']);
   const wsCat = XLSX.utils.aoa_to_sheet(catRows);
-  wsCat['!cols'] = [{wch:26},{wch:10},{wch:18},{wch:20}];
-  XLSX.utils.book_append_sheet(wb, wsCat, 'Category Summary');
+  wsCat['!cols'] = [{wch:4},{wch:28},{wch:10},{wch:18},{wch:16},{wch:20},{wch:14},{wch:12},{wch:16}];
+  XLSX.utils.book_append_sheet(wb, wsCat, 'Categories');
 
-  // ── Summary sheet ──
-  const inc = S.transactions.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
-  const exp = S.transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-  const sumRows = [
-    ['FINANCE TRACKER — FULL EXPORT',''],
-    ['Exported on', now],
-    ['',''],
-    ['SUMMARY',''],
-    ['Total Income (₹)', inc],
-    ['Total Expenses (₹)', exp],
-    ['Net Savings (₹)', Math.max(inc-exp,0)],
-    ['Net Worth (₹)', S.accounts.reduce((s,a)=>s+a.balance,0)],
-    ['Total Transactions', S.transactions.length],
-    ['Active Budgets', S.budgets.length],
-    ['Savings Goals', S.goals.length],
-    ['Active Loans', S.loans.length],
-    ['Accounts', S.accounts.length],
-  ];
-  const wsSum = XLSX.utils.aoa_to_sheet(sumRows);
-  wsSum['!cols'] = [{wch:28},{wch:24}];
-  XLSX.utils.book_append_sheet(wb, wsSum, 'Summary');
+  // ════════════════════════════════════════
+  // SHEET 8 — MONTHLY BREAKDOWN
+  // ════════════════════════════════════════
+  const months = [];
+  for(let i=11;i>=0;i--){
+    const d=new Date(); d.setDate(1); d.setMonth(d.getMonth()-i);
+    months.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'));
+  }
+  const mthRows = [['Month','Income (₹)','Expenses (₹)','Net (₹)','Savings Rate (%)','No. of Transactions']];
+  months.forEach(m=>{
+    const mt  = S.transactions.filter(t=>t.date.startsWith(m));
+    const mI  = mt.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+    const mE  = mt.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+    const mR  = mI>0?Math.round((mI-mE)/mI*100):0;
+    if(mt.length>0) mthRows.push([m,mI,mE,mI-mE,mR+'%',mt.length]);
+  });
+  if(mthRows.length===1) mthRows.push(['No transaction history yet','','','','','']);
+  const wsMth = XLSX.utils.aoa_to_sheet(mthRows);
+  wsMth['!cols'] = [{wch:14},{wch:16},{wch:16},{wch:16},{wch:16},{wch:22}];
+  XLSX.utils.book_append_sheet(wb, wsMth, 'Monthly Breakdown');
 
-  const fname = `FinTrack-Export-${new Date().toISOString().split('T')[0]}.xlsx`;
+  // ════════════════════════════════════════
+  // SHEET 9 — CATEGORY × MONTH matrix
+  // ════════════════════════════════════════
+  const expCats = S.categories.filter(cat=>
+    S.transactions.some(t=>t.catId===cat.id&&t.type==='expense')
+  );
+  if(expCats.length>0){
+    const hdr = ['Category',...months,'Total'];
+    const cmRows = [hdr];
+    expCats.forEach(cat=>{
+      const row = [cat.name];
+      let total = 0;
+      months.forEach(m=>{
+        const amt = S.transactions
+          .filter(t=>t.catId===cat.id&&t.type==='expense'&&t.date.startsWith(m))
+          .reduce((s,t)=>s+t.amount,0);
+        row.push(amt||0); total+=amt;
+      });
+      row.push(total);
+      if(total>0) cmRows.push(row);
+    });
+    if(cmRows.length>1){
+      const wsCM = XLSX.utils.aoa_to_sheet(cmRows);
+      wsCM['!cols'] = [{wch:26},...months.map(()=>({wch:12})),{wch:14}];
+      XLSX.utils.book_append_sheet(wb, wsCM, 'Spend by Category×Month');
+    }
+  }
+
+  // ── Write file ──
+  const fname = 'FinTrack-FullExport-'+new Date().toISOString().split('T')[0]+'.xlsx';
   XLSX.writeFile(wb, fname);
-  saveData();toast('Exported: '+fname);
+  toast('✓ Exported '+fname+' ('+
+    [S.transactions.length+' txns',
+     S.accounts.length+' accounts',
+     S.budgets.length+' budgets',
+     S.goals.length+' goals',
+     S.loans.length+' loans'].join(', ')+')');
 }
 
 function exportTransactionsOnly(){
