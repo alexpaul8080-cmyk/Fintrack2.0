@@ -1809,6 +1809,68 @@ img, canvas { will-change: auto; }
     </div>
 
   </div>
+  <!-- ── DANGER ZONE ── -->
+  <div class="card glass" style="margin-bottom:14px;border:1px solid rgba(220,38,38,0.20);border-top-color:rgba(220,38,38,0.35);">
+    <div class="card-head">
+      <h3 style="color:#DC2626;">⚠ Danger Zone</h3>
+      <span class="meta" style="color:rgba(220,38,38,0.6);">Irreversible actions</span>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:4px;">Wipe All Data</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.6;max-width:480px;">
+          Permanently deletes all transactions, accounts, budgets, goals, loans and categories.
+          This also clears your Google Drive backup. <strong style="color:#DC2626;">This cannot be undone.</strong>
+        </div>
+      </div>
+      <button class="btn" onclick="confirmWipe()"
+        style="background:rgba(220,38,38,0.10);color:#DC2626;border:1.5px solid rgba(220,38,38,0.30);
+               padding:10px 22px;font-size:13px;font-weight:600;white-space:nowrap;flex-shrink:0;
+               border-radius:12px;cursor:pointer;transition:background 0.15s,box-shadow 0.15s;"
+        onmouseover="this.style.background='rgba(220,38,38,0.20)';this.style.boxShadow='0 4px 16px rgba(220,38,38,0.25)'"
+        onmouseout="this.style.background='rgba(220,38,38,0.10)';this.style.boxShadow='none'">
+        🗑 Wipe All Data
+      </button>
+    </div>
+  </div>
+
+  <!-- ── WIPE CONFIRMATION MODAL ── -->
+  <div id="wipe-modal-bg" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:center;justify-content:center;">
+    <div id="wipe-modal" style="background:var(--lg-fill);backdrop-filter:var(--lg-blur);-webkit-backdrop-filter:var(--lg-blur);border:1px solid rgba(220,38,38,0.30);border-top-color:rgba(220,38,38,0.50);border-radius:22px;padding:32px;max-width:420px;width:90%;box-shadow:0 24px 64px rgba(0,0,0,0.5),0 1px 0 rgba(255,255,255,0.08) inset;position:relative;">
+      <!-- Icon -->
+      <div style="width:56px;height:56px;border-radius:16px;background:rgba(220,38,38,0.12);border:1.5px solid rgba(220,38,38,0.25);display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:20px;">🗑</div>
+      <div style="font-size:20px;font-weight:700;color:var(--ink);margin-bottom:8px;letter-spacing:-0.3px;">Wipe all data?</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.65;margin-bottom:20px;">
+        This will permanently delete <strong style="color:var(--ink);">everything</strong> — all transactions, accounts, budgets, goals, loans and categories.<br><br>
+        Your Google Drive backup will also be cleared. <strong style="color:#DC2626;">This action cannot be undone.</strong>
+      </div>
+      <!-- Confirm typing -->
+      <div style="margin-bottom:20px;">
+        <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:8px;">
+          Type <span style="color:#DC2626;font-family:monospace;">WIPE</span> to confirm
+        </label>
+        <input type="text" id="wipe-confirm-input" placeholder="Type WIPE here"
+          oninput="const btn=document.getElementById('wipe-confirm-btn');const ok=this.value.trim()==='WIPE';btn.disabled=!ok;btn.style.opacity=ok?'1':'0.4';btn.style.cursor=ok?'pointer':'not-allowed';"
+          style="width:100%;padding:10px 14px;border-radius:10px;border:1.5px solid rgba(220,38,38,0.25);background:rgba(220,38,38,0.06);color:var(--ink);font-size:15px;font-family:var(--font);outline:none;letter-spacing:0.05em;box-sizing:border-box;"
+          onfocus="this.style.borderColor='rgba(220,38,38,0.5)'"
+          onblur="this.style.borderColor='rgba(220,38,38,0.25)'">
+      </div>
+      <!-- Buttons -->
+      <div style="display:flex;gap:10px;">
+        <button onclick="closeWipeModal()"
+          style="flex:1;padding:11px;border-radius:12px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.07);color:var(--ink);font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font);">
+          Cancel
+        </button>
+        <button id="wipe-confirm-btn" onclick="executeWipe()" disabled
+          style="flex:1;padding:11px;border-radius:12px;border:1.5px solid rgba(220,38,38,0.35);background:rgba(220,38,38,0.85);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);opacity:0.4;transition:opacity 0.15s;"
+          onmouseover="if(!this.disabled)this.style.background='rgba(220,38,38,1)'"
+          onmouseout="this.style.background='rgba(220,38,38,0.85)'">
+          Wipe Everything
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div class="card glass" style="margin-bottom:14px;">
     <div class="card-head"><h3>Cash Flow Trend</h3><span class="meta">6-month gradient flow</span></div>
     <div class="chart-wrap tall"><canvas id="ch-line"></canvas></div>
@@ -2454,16 +2516,68 @@ function saveData(){
   else saveLocalBackup();
 }
 
-// ── clearData ──
+// ── clearData — full wipe ──
 function clearData(){
+  // Reset all state
+  S.accounts=[];S.transactions=[];S.categories=[];
+  S.budgets=[];S.goals=[];S.loans=[];
+  S.nAcc=1;S.nTxn=1;S.nCat=1;S.nBgt=1;S.nGoal=1;S.nLoan=1;
+  // Clear localStorage
   try{ localStorage.removeItem(localKey()); } catch(e){}
-  if(driveAccessToken){
-    // Write empty snapshot to Drive
-    S.accounts=[];S.transactions=[];S.categories=[];S.budgets=[];S.goals=[];S.loans=[];
-    S.nAcc=1;S.nTxn=1;S.nCat=1;S.nBgt=1;S.nGoal=1;S.nLoan=1;
-    driveSave();
-  }
+  // Clear Drive — write empty snapshot
+  if(driveAccessToken) driveSave();
+  // Reset dash hash so charts rebuild
+  window._dashDataHash = '';
+  window._lastDashHash = '';
 }
+
+// ── Wipe confirmation modal handlers ──
+function confirmWipe(){
+  const bg = document.getElementById('wipe-modal-bg');
+  const inp = document.getElementById('wipe-confirm-input');
+  const btn = document.getElementById('wipe-confirm-btn');
+  if(inp){ inp.value=''; }
+  if(btn){ btn.disabled=true; btn.style.opacity='0.4'; }
+  if(bg){ bg.style.display='flex'; setTimeout(()=>inp?.focus(), 80); }
+}
+
+function closeWipeModal(){
+  const bg = document.getElementById('wipe-modal-bg');
+  if(bg) bg.style.display='none';
+  const inp = document.getElementById('wipe-confirm-input');
+  if(inp) inp.value='';
+  const btn = document.getElementById('wipe-confirm-btn');
+  if(btn){ btn.disabled=true; btn.style.opacity='0.4'; }
+}
+
+function executeWipe(){
+  const inp = document.getElementById('wipe-confirm-input');
+  if(!inp || inp.value.trim()!=='WIPE') return;
+  closeWipeModal();
+  // Slight delay so modal closes smoothly before heavy work
+  setTimeout(()=>{
+    clearData();
+    refreshDash();
+    renderTxns();
+    renderAccounts();
+    renderBudgets();
+    renderGoals();
+    renderLoans();
+    renderCats();
+    refreshAnalytics();
+    toast('All data wiped. Starting fresh.');
+  }, 200);
+}
+
+// Close wipe modal on background click
+document.addEventListener('click', function(e){
+  const bg = document.getElementById('wipe-modal-bg');
+  if(e.target === bg) closeWipeModal();
+});
+// Close on Escape
+document.addEventListener('keydown', function(e){
+  if(e.key==='Escape') closeWipeModal();
+});
 
 // ══════════════════════════════════════
 // STATE
