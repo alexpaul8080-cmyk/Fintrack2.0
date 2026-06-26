@@ -4447,7 +4447,9 @@ function processXL(file){
             catName:cat?.name, catIcon:cat?.icon, catColor:cat?.color,
             accName:acc?.name
           });
-          if(acc) acc.balance+=type==='income'?amt:-amt;
+          // NOTE: acc.balance is NOT modified here — the Accounts sheet already
+          // stores the correct final balance. Re-applying every transaction would
+          // double-count all amounts (bug fix: was causing 2x balance on re-import).
           c.txns++;
         });
         S.transactions.sort((a,b)=>b.date.localeCompare(a.date));
