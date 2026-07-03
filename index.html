@@ -268,13 +268,13 @@ main{max-width:1680px;margin:0 auto;padding:36px 48px 100px;}
 .dash-widget.dragging{opacity:0.35;}
 .dash-widget-handle{
   display:flex;align-items:center;justify-content:center;gap:6px;
-  height:0;overflow:hidden;opacity:0;
-  margin-bottom:0;border-radius:10px;
+  height:18px;margin-bottom:4px;border-radius:8px;
   background:rgba(255,255,255,0.05);border:1px dashed rgba(255,255,255,0.16);
-  color:var(--muted);font-size:11px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;
-  cursor:grab;transition:opacity 0.15s,height 0.15s,margin 0.15s;user-select:none;
+  color:var(--muted);font-size:10px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;
+  cursor:grab;user-select:none;opacity:0;pointer-events:none;
+  transform:translateZ(0);transition:opacity 0.15s;will-change:opacity;
 }
-.dash-widget:hover .dash-widget-handle{height:26px;opacity:1;margin-bottom:8px;}
+.dash-widget:hover .dash-widget-handle{opacity:1;pointer-events:auto;}
 .dash-widget-handle:active{cursor:grabbing;}
 body.light-mode .dash-widget-handle{background:rgba(0,0,0,0.03);border-color:rgba(0,0,0,0.12);}
 .kpi{
@@ -1625,8 +1625,8 @@ img, canvas { will-change: auto; }
 
   <div class="dash-widget" data-wid="row1">
     <div class="dash-widget-handle" draggable="true" ondragstart="dashDragStart(event)" ondragend="dashDragEnd(event)" title="Drag to reorder">⠿ Drag to reorder ⠿</div>
-    <!-- ROW 1: Budget Status (main) + Donut -->
-    <div class="chart-grid g-2-1" style="animation:fadeUp 0.5s 0.16s ease both;opacity:0;margin-bottom:14px">
+    <!-- ROW 1: Budget Status -->
+    <div style="animation:fadeUp 0.5s 0.16s ease both;opacity:0;margin-bottom:14px">
       <!-- Budget Status — detailed with daily limit -->
       <div class="card glass">
         <div class="card-head">
@@ -1641,21 +1641,6 @@ img, canvas { will-change: auto; }
         <!-- Per-category list -->
         <div id="dash-budgets" style="max-height:360px;overflow-y:auto;padding-right:4px;"></div>
       </div>
-      <!-- Income vs Expense Curve -->
-      <div class="card glass">
-    <div class="card-head">
-      <h3>Income vs Expense</h3>
-      <div style="display:flex;align-items:center;gap:12px;">
-        <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:#9ca3af">
-          <span style="width:12px;height:3px;border-radius:2px;background:#16A34A;display:inline-block"></span>Income
-        </span>
-        <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:#9ca3af">
-          <span style="width:12px;height:3px;border-radius:2px;background:#DC2626;display:inline-block"></span>Expense
-        </span>
-      </div>
-    </div>
-    <div style="height:260px;position:relative;"><canvas id="ch-donut"></canvas></div>
-  </div>
     </div>
   </div>
 
@@ -3434,7 +3419,7 @@ function openBudgetTxnsModal(id){
         <div style="font-size:11.5px;color:var(--muted);margin-top:2px;">${t.accName||'—'} · ${fmtDate(t.date)}${t.isTransfer?' · Transfer':''}</div>
       </div>
       <div class="${t.type==='income'?'val-pos':'val-neg'}" style="font-weight:700;font-size:14px;white-space:nowrap;">${t.type==='income'?'+':'−'}₹${fmt(t.amount)}</div>
-    </div>`).join('') : `<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px;">No transactions in this category yet</div>`;
+    </div>`).join('') : `<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px;">No transactions found in <strong style="color:var(--ink)">${catName}</strong> yet.<br>Add a transaction using ${txns.length===0&&ids.length>1?'one of these categories':'this category'} to see it here.</div>`;
 
   document.getElementById('bgttxns-edit-btn').onclick=()=>{closeModal('bgttxns');openModal('budget',id);};
   document.getElementById('m-bgttxns').classList.add('open');
@@ -4139,7 +4124,7 @@ function refreshDash(){
   const allExp=S.transactions.filter(t=>t.type==='expense'&&!t.isTransfer).reduce((s,t)=>s+t.amount,0);
   const rate=allInc>0?Math.round((allInc-allExp)/allInc*100):0;
   const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
-  set('kpi-bal','₹'+fmt(bal)); set('kpi-inc','₹'+fmt(inc)); set('kpi-exp','₹'+fmt(exp));
+  set('kpi-bal','₹'+fmt(bal)); set('kpi-inc','₹'+fmt(allInc)); set('kpi-exp','₹'+fmt(allExp));
   set('kpi-txns',S.transactions.length); set('kpi-rate',rate+'%');
   set('dash-total-balance','₹'+fmt(bal));
   set('hs-balance','₹'+fmt(bal)); set('hs-income','₹'+fmt(allInc));
@@ -4175,7 +4160,7 @@ function refreshDash(){
   const newHash=S.transactions.length+'|'+S.accounts.length+'|'+Math.round(bal);
   if(newHash!==_dashDataHash){
     _dashDataHash=newHash;
-    requestAnimationFrame(()=>{ if(moMode==='savings'){renderSavingsChart();}else{renderBarChart();} renderDonutChart(); });
+    requestAnimationFrame(()=>{ if(moMode==='savings'){renderSavingsChart();}else{renderBarChart();} });
   }
   applyDashOrder();
 }
@@ -4190,6 +4175,7 @@ function applyDashOrder(){
   const known=[...container.children].filter(c=>c.classList.contains('dash-widget')).map(c=>c.dataset.wid);
   let order=(S.dashOrder&&S.dashOrder.length)?S.dashOrder.filter(id=>known.includes(id)):known.slice();
   known.forEach(id=>{if(!order.includes(id))order.push(id);});
+  if(order.join(',')===known.join(','))return; // already in the right order — skip DOM writes
   order.forEach(id=>{const el=container.querySelector(`.dash-widget[data-wid="${id}"]`);if(el)container.appendChild(el);});
 }
 function resetDashOrder(){
@@ -4210,13 +4196,19 @@ function dashDragEnd(e){
   document.querySelectorAll('.dash-widget.dragging').forEach(w=>w.classList.remove('dragging'));
   saveDashOrder();
 }
+let _dashDragRaf=null,_dashDragY=null;
 function dashDragOver(e){
   e.preventDefault();e.dataTransfer.dropEffect='move';
-  const container=document.getElementById('dash-widgets');
-  const dragging=container.querySelector('.dash-widget.dragging');if(!dragging)return;
-  const after=dashGetDragAfterElement(container,e.clientY);
-  if(after==null)container.appendChild(dragging);
-  else container.insertBefore(dragging,after);
+  _dashDragY=e.clientY;
+  if(_dashDragRaf)return; // throttle to one reorder per animation frame
+  _dashDragRaf=requestAnimationFrame(()=>{
+    _dashDragRaf=null;
+    const container=document.getElementById('dash-widgets');
+    const dragging=container?.querySelector('.dash-widget.dragging');if(!dragging)return;
+    const after=dashGetDragAfterElement(container,_dashDragY);
+    if(after==null)container.appendChild(dragging);
+    else if(after!==dragging.nextSibling)container.insertBefore(dragging,after);
+  });
 }
 function dashGetDragAfterElement(container,y){
   const els=[...container.querySelectorAll('.dash-widget:not(.dragging)')];
