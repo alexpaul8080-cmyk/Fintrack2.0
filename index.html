@@ -2402,7 +2402,7 @@ function doSignIn(name, email='', picture='', provider=''){
   updateSyncBadge('connecting');
   // Load data — Drive if Google, localStorage if name-only
   loadData().then(hadData => {
-    refreshDash();
+    refreshAllViews();
     const src = (provider === 'google' && driveAccessToken) ? '☁️ Google Drive synced' : '💾 Local data loaded';
     if(!hadData){
       setTimeout(()=>toast('Welcome to FinTrack, '+first+'! Add your first account.'),600);
@@ -2410,6 +2410,18 @@ function doSignIn(name, email='', picture='', provider=''){
       setTimeout(()=>toast('Welcome back, '+first+'! ✓ '+src),400);
     }
   });
+}
+
+// ── Re-render every page's data after an async load (Drive fetch can finish
+// after the user has already navigated to another tab with stale/empty data) ──
+function refreshAllViews(){
+  refreshDash();
+  renderTxns?.();
+  renderAccounts?.();
+  renderCats?.();
+  renderBudgets?.();
+  renderGoals?.();
+  renderLoans?.();
 }
 
 function signOut(){
