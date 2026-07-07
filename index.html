@@ -44,10 +44,12 @@
 
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;}
+html{overflow-x:hidden;width:100%;}
 body{
   font-family:var(--font);background:#0a0a0a;color:#f3f4f6;
   -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
   line-height:1.5;min-height:100vh;
+  overflow-x:hidden;width:100%;max-width:100vw;
 }
 
 /* ── Dynamic Aurora Background ── */
@@ -314,6 +316,39 @@ body.privacy-on .privacy-sensitive{filter:blur(9px) !important;user-select:none;
 .privacy-toggle-btn svg{width:14px;height:14px;flex-shrink:0;}
 body.light-mode .privacy-toggle-btn{background:#f0f0f0;border-color:rgba(0,0,0,0.12);color:#555;}
 
+/* ── Mobile header / hamburger nav ── */
+.hamburger-btn{display:none;flex-shrink:0;width:38px;height:38px;border-radius:11px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.07);color:var(--ink);align-items:center;justify-content:center;cursor:pointer;}
+.hamburger-btn svg{width:19px;height:19px;}
+@media(max-width:900px){
+  .masthead-inner{flex-wrap:nowrap;padding:12px 16px;}
+  .hamburger-btn{display:inline-flex;}
+  .view-tabs{
+    display:none;position:absolute;left:0;right:0;top:100%;
+    flex-direction:column;gap:2px;padding:10px 16px 16px;
+    background:rgba(12,12,16,0.97);backdrop-filter:blur(20px) saturate(140%);
+    border-bottom:1px solid rgba(255,255,255,0.1);
+    max-height:calc(100vh - 64px);overflow-y:auto;z-index:50;
+  }
+  body.light-mode .view-tabs{background:rgba(255,255,255,0.98);}
+  .view-tabs.mobile-open{display:flex;}
+  .view-tab{width:100%;text-align:left;padding:12px 14px;}
+  .masthead{position:relative;}
+  #sync-badge{display:none !important;}
+  #user-name-disp{display:none;}
+  .user-name-badge{padding:5px !important;}
+  .privacy-toggle-btn span#privacyBtnLabel{display:none;}
+  .privacy-toggle-btn{padding:8px !important;}
+  header .masthead-inner > div[style*="flex-shrink:0"]:last-child{gap:6px !important;}
+  .signout-btn{display:none;}
+  .mobile-nav-signout{display:block !important;margin-top:8px;border-top:1px solid rgba(255,255,255,0.1);padding-top:12px !important;color:#DC2626 !important;}
+}
+@media(max-width:480px){
+  .masthead-inner{padding:10px 12px;gap:8px;}
+  #ft-logo-mh{height:28px !important;}
+  .theme-toggle-wrap{transform:scale(0.85);}
+  .signout-btn{padding:7px 10px !important;font-size:12px !important;}
+}
+
 /* ── Master Period control (Analytics) — green theme ── */
 .mst-green .dr-tab.active{background:linear-gradient(135deg,#16A34A,#22c55e) !important;box-shadow:0 2px 10px rgba(22,163,74,0.4) !important;}
 .mst-green .dr-chip{background:linear-gradient(160deg,rgba(22,163,74,0.14),rgba(22,163,74,0.04)) !important;border-color:rgba(22,163,74,0.35) !important;}
@@ -342,6 +377,8 @@ body.light-mode .mst-green .dr-chip{background:linear-gradient(160deg,rgba(22,16
 .card-head h3{font-size:16px;font-weight:700;color:#ffffff;}
 .card-head .meta{font-size:11px;color:rgba(255,255,255,0.45);}
 .chart-grid{display:grid;gap:14px;margin-bottom:14px;}
+.chart-grid > *{min-width:0;}
+.dash-widget{min-width:0;}
 .chart-grid.g-2-1{grid-template-columns:1.8fr 1fr;}
 .chart-grid.g-1-1{grid-template-columns:1fr 1fr;}
 .chart-grid.g-1-1-1{grid-template-columns:1fr 1fr 1fr;}
@@ -1598,16 +1635,21 @@ img, canvas { will-change: auto; }
   <path class="fmh-1" d="M37.81,15.7l5.1,6.5v22.6l-5.1-6.6V15.7Z"/>
 </svg>
     </div>
+    <!-- Hamburger (mobile only) -->
+    <button class="hamburger-btn" onclick="toggleMobileNav()" title="Menu" id="hamburgerBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
     <!-- Nav tabs — fills middle -->
     <div class="view-tabs" id="mainNav" style="flex:1;justify-content:center;">
-      <button class="view-tab active" onclick="showPage('dashboard',this)">Dashboard</button>
-      <button class="view-tab" onclick="showPage('accounts',this)">Accounts</button>
-      <button class="view-tab" onclick="showPage('transactions',this)">Transactions</button>
-      <button class="view-tab" onclick="showPage('budgets',this)">Budgets</button>
-      <button class="view-tab" onclick="showPage('goals',this)">Goals</button>
-      <button class="view-tab" onclick="showPage('loans',this)">Loans</button>
-      <button class="view-tab" onclick="showPage('categories',this)">Categories</button>
-      <button class="view-tab" onclick="showPage('analytics',this)">Analytics</button>
+      <button class="view-tab active" onclick="showPage('dashboard',this);closeMobileNav()">Dashboard</button>
+      <button class="view-tab" onclick="showPage('accounts',this);closeMobileNav()">Accounts</button>
+      <button class="view-tab" onclick="showPage('transactions',this);closeMobileNav()">Transactions</button>
+      <button class="view-tab" onclick="showPage('budgets',this);closeMobileNav()">Budgets</button>
+      <button class="view-tab" onclick="showPage('goals',this);closeMobileNav()">Goals</button>
+      <button class="view-tab" onclick="showPage('loans',this);closeMobileNav()">Loans</button>
+      <button class="view-tab" onclick="showPage('categories',this);closeMobileNav()">Categories</button>
+      <button class="view-tab" onclick="showPage('analytics',this);closeMobileNav()">Analytics</button>
+      <button class="view-tab mobile-nav-signout" style="display:none;" onclick="signOut()">Sign out</button>
     </div>
     <!-- User pill + theme toggle + sign out — top right -->
     <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
@@ -1962,6 +2004,29 @@ img, canvas { will-change: auto; }
   </div>
   </div>
 
+  <div class="dash-widget" data-wid="bank_import">
+    <div class="dash-widget-handle" draggable="true" ondragstart="anaDragStart(event)" ondragend="anaDragEnd(event)" title="Drag to reorder">⠿ Drag to reorder ⠿</div>
+  <!-- ── BANK STATEMENT IMPORT ── -->
+  <div class="card glass" style="margin-bottom:14px;">
+    <div class="card-head">
+      <h3>Import Bank Statement</h3>
+      <span class="meta">CSV or Excel · Auto-categorized</span>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6;">
+      Upload your bank's own statement export (not the FinTrack template) — I'll detect Date, Description, Debit/Credit columns, guess a category for each row based on your existing categories and common merchant patterns, flag likely duplicates, and let you review everything before anything is added.
+    </p>
+    <div class="upload-zone glass" onclick="document.getElementById('bi-input').click()"
+      ondragover="event.preventDefault();this.classList.add('drag')"
+      ondragleave="this.classList.remove('drag')"
+      ondrop="event.preventDefault();this.classList.remove('drag');if(event.dataTransfer.files[0])startBankImport(event.dataTransfer.files[0])">
+      <h3>Drop statement here or click to browse</h3>
+      <p>.csv, .xlsx or .xls — works with most Indian bank exports</p>
+      <button class="btn btn-primary" onclick="event.stopPropagation();document.getElementById('bi-input').click()">Choose File</button>
+      <input type="file" id="bi-input" accept=".csv,.xlsx,.xls" style="display:none" onchange="if(this.files[0])startBankImport(this.files[0])">
+    </div>
+  </div>
+  </div>
+
   <div class="dash-widget" data-wid="danger_zone">
     <div class="dash-widget-handle" draggable="true" ondragstart="anaDragStart(event)" ondragend="anaDragEnd(event)" title="Drag to reorder">⠿ Drag to reorder ⠿</div>
   <!-- ── DANGER ZONE ── -->
@@ -2115,6 +2180,86 @@ img, canvas { will-change: auto; }
 </div><!-- /app-shell -->
 
 <!-- ══════ MODALS ══════ -->
+<!-- Bank Statement Import Wizard -->
+<div class="modal-bg" id="m-bankimport">
+  <div class="modal" style="width:880px;">
+    <div class="modal-hdr"><span class="modal-title">Import Bank Statement</span><button class="modal-close" onclick="closeBankImport()">✕</button></div>
+
+    <!-- STEP 1: pick header row -->
+    <div id="bi-step-header">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6;">Some banks add a few info lines before the actual column headers. Pick the row that contains column names like "Date", "Description", "Debit", "Credit".</p>
+      <div id="bi-raw-preview" style="max-height:240px;overflow:auto;border:1px solid rgba(200,200,200,0.14);border-radius:12px;margin-bottom:16px;"></div>
+      <div class="fg" style="max-width:220px;">
+        <label>Header row number</label>
+        <input type="number" id="bi-header-row" min="1" value="1" style="width:100%;" onchange="renderBiRawPreview()">
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="closeBankImport()">Cancel</button>
+        <button class="btn btn-primary" onclick="goToBiMapStep()">Next: Map Columns</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: column mapping -->
+    <div id="bi-step-map" style="display:none;">
+      <div class="fg-row">
+        <div class="fg"><label>Date column</label><select id="bi-col-date"></select></div>
+        <div class="fg"><label>Description column</label><select id="bi-col-desc"></select></div>
+      </div>
+      <div class="fg" style="margin-bottom:6px;">
+        <label style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer;">
+          <input type="checkbox" id="bi-single-amount" onchange="toggleBiAmountMode()" style="width:16px;height:16px;accent-color:#6366f1;">
+          My statement has one "Amount" column instead of separate Debit/Credit columns
+        </label>
+      </div>
+      <div class="fg-row" id="bi-debit-credit-row">
+        <div class="fg"><label>Debit / Withdrawal column</label><select id="bi-col-debit"></select></div>
+        <div class="fg"><label>Credit / Deposit column</label><select id="bi-col-credit"></select></div>
+      </div>
+      <div class="fg-row" id="bi-single-amount-row" style="display:none;">
+        <div class="fg"><label>Amount column</label><select id="bi-col-amount"></select></div>
+        <div class="fg">
+          <label>Sign convention</label>
+          <select id="bi-amount-sign">
+            <option value="neg-expense">Negative = expense, Positive = income</option>
+            <option value="neg-income">Negative = income, Positive = expense</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label>Add these transactions to account</label><select id="bi-account"></select></div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="backToBiHeaderStep()">Back</button>
+        <button class="btn btn-primary" onclick="goToBiPreviewStep()">Next: Preview &amp; Categorize</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: preview + categorize + import -->
+    <div id="bi-step-preview" style="display:none;">
+      <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;margin-bottom:14px;">
+        <div class="fg" style="margin-bottom:0;"><label>From (optional)</label><input type="date" id="bi-filter-from" onchange="renderBiPreviewTable()"></div>
+        <div class="fg" style="margin-bottom:0;"><label>To (optional)</label><input type="date" id="bi-filter-to" onchange="renderBiPreviewTable()"></div>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);font-weight:600;cursor:pointer;margin-bottom:8px;">
+          <input type="checkbox" id="bi-hide-dupes" checked onchange="renderBiPreviewTable()" style="width:15px;height:15px;accent-color:#6366f1;">
+          Hide likely duplicates
+        </label>
+        <span id="bi-summary" style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:8px;margin-left:auto;"></span>
+      </div>
+      <div style="overflow-x:auto;">
+        <div id="bi-preview-wrap" style="min-width:760px;">
+          <div style="display:grid;grid-template-columns:24px 95px 1fr 90px 90px 150px 34px;gap:6px;padding:0 2px 6px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">
+            <div></div><div>Date</div><div>Description</div><div>Type</div><div>Amount</div><div>Category</div><div></div>
+          </div>
+          <div id="bi-preview-rows" style="display:flex;flex-direction:column;gap:5px;max-height:360px;overflow-y:auto;"></div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <span id="bi-selected-count" style="font-size:12px;color:var(--muted);margin-right:auto;font-weight:600;align-self:center;"></span>
+        <button class="btn btn-ghost" onclick="backToBiMapStep()">Back</button>
+        <button class="btn btn-primary" onclick="commitBankImport()">Import Selected</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Transaction -->
 <div class="modal-bg" id="m-txn">
   <div class="modal" style="width:620px;" id="m-txn-modal-inner">
@@ -3420,6 +3565,12 @@ let _txnPage=0;
 // ── Privacy mode: blur balances/amounts across the app ──
 const PRIVACY_EYE_OPEN='<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>';
 const PRIVACY_EYE_CLOSED='<path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a20.7 20.7 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 7 11 7a20.7 20.7 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+function toggleMobileNav(){
+  document.getElementById('mainNav').classList.toggle('mobile-open');
+}
+function closeMobileNav(){
+  document.getElementById('mainNav').classList.remove('mobile-open');
+}
 function togglePrivacy(){
   const isOn=document.body.classList.toggle('privacy-on');
   localStorage.setItem('ft-privacy', isOn?'1':'0');
@@ -5667,6 +5818,278 @@ function renderCatBreakdown(){
     const pct=Math.round(v/totalExp*100);
     return `<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span style="font-weight:700">${c.name}</span><span style="font-size:12px;font-weight:700;color:${c.color}">₹${fmt(v)} <span style="color:var(--muted);font-weight:400">(${pct}%)</span></span></div><div class="prog-wrap"><div class="prog-track"><div class="prog-bar ok" style="width:${pct}%;background:${c.color}"></div></div><span class="prog-num">${pct}%</span></div></div>`;
   }).join('');
+}
+
+// ══════════════════════════════════════
+// BANK STATEMENT IMPORT — raw bank CSV/Excel, column mapping, auto-categorize, dedupe
+// ══════════════════════════════════════
+let BI = {rows:null, headerRow:1, colDate:null, colDesc:null, colDebit:null, colCredit:null, colAmount:null, accId:null, parsed:[]};
+
+const BANK_CATEGORY_RULES = [
+  {keywords:['swiggy','zomato','eatsure','dominos','pizza','mcdonald','kfc','burger king','faasos','box8','behrouz'], cat:'Food & Dining', type:'expense'},
+  {keywords:['uber','ola cabs','olacabs',' ola ','rapido','irctc','indian railway','redbus','metro','fuel','petrol','diesel','indianoil','hpcl','bpcl'], cat:'Transport', type:'expense'},
+  {keywords:['amazon','flipkart','myntra','ajio','meesho','nykaa','snapdeal'], cat:'Shopping', type:'expense'},
+  {keywords:['netflix','spotify','hotstar','prime video','youtube premium','sonyliv','jiocinema','apple.com/bill','google play'], cat:'Subscriptions', type:'expense'},
+  {keywords:['electricity','bescom','tneb','mseb','power bill','water bill','gas bill','broadband','airtel','jio','vodafone','vi postpaid','act fibernet'], cat:'Bills & Utilities', type:'expense'},
+  {keywords:['rent payment','house rent','landlord'], cat:'Rent', type:'expense'},
+  {keywords:['pharmacy','apollo','medplus','pharmeasy','1mg','hospital','clinic','diagnostic','practo'], cat:'Health', type:'expense'},
+  {keywords:['salary','sal credit','payroll','neft cr salary'], cat:'Salary', type:'income'},
+  {keywords:['interest credit','int.pd','savings interest','int cr'], cat:'Interest', type:'income'},
+  {keywords:['refund','cashback','reversal'], cat:'Refunds', type:'income'},
+  {keywords:['atm wdl','atm cash','cash withdrawal','cash wdl','nfs '], cat:'Cash Withdrawal', type:'expense'},
+  {keywords:['mutual fund','sip ','zerodha','groww','upstox','coin '], cat:'Investments', type:'expense'},
+  {keywords:['insurance premium','lic premium','policybazaar'], cat:'Insurance', type:'expense'},
+  {keywords:['school fee','tuition','college fee'], cat:'Education', type:'expense'},
+];
+
+function biNormDesc(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim(); }
+
+function guessCategoryFromHistory(desc){
+  const norm = biNormDesc(desc);
+  const tokens = norm.split(' ').filter(w=>w.length>=4 && !/^\d+$/.test(w));
+  if(!tokens.length) return null;
+  let best=null, bestScore=0;
+  S.transactions.forEach(t=>{
+    if(!t.catId) return;
+    const tNorm = biNormDesc(t.desc);
+    let score=0;
+    tokens.forEach(tok=>{ if(tNorm.includes(tok)) score++; });
+    if(score>bestScore){ bestScore=score; best=t; }
+  });
+  if(best && bestScore>0) return {catId:best.catId, catName:best.catName, type:best.type};
+  return null;
+}
+function guessCategoryFromRules(desc){
+  const norm = biNormDesc(desc);
+  for(const rule of BANK_CATEGORY_RULES){
+    if(rule.keywords.some(k=>norm.includes(k))) return {catName:rule.cat, type:rule.type};
+  }
+  return null;
+}
+function guessCategoryForRow(desc,type){
+  const hist = guessCategoryFromHistory(desc);
+  if(hist && (!type || hist.type===type)) return {catId:hist.catId, catName:hist.catName, source:'history'};
+  const rule = guessCategoryFromRules(desc);
+  if(rule){
+    const existing = S.categories.find(c=>c.name.toLowerCase()===rule.catName.toLowerCase() && c.type===(type||rule.type));
+    if(existing) return {catId:existing.id, catName:existing.name, source:'rule'};
+    return {catId:null, catName:rule.catName, source:'rule-new'}; // category will be created on import
+  }
+  return {catId:null, catName:'', source:'none'};
+}
+
+function biParseDate(raw){
+  if(raw==null || raw==='') return '';
+  if(typeof raw==='number'){
+    const d=XLSX.SSF.parse_date_code(raw);
+    if(d) return `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;
+  }
+  const s=String(raw).trim();
+  let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/); // YYYY-MM-DD
+  if(m) return `${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}`;
+  m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/); // DD/MM/YYYY or DD-MM-YYYY
+  if(m){
+    let [_,d,mo,y]=m;
+    if(y.length===2) y='20'+y;
+    return `${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  }
+  const dt=new Date(s);
+  if(!isNaN(dt.getTime())) return dt.toISOString().slice(0,10);
+  return '';
+}
+function biParseAmount(raw){
+  if(raw==null||raw==='') return 0;
+  const n=parseFloat(String(raw).replace(/[₹,\s]/g,''));
+  return isNaN(n)?0:n;
+}
+function isDuplicateBiRow(row){
+  return S.transactions.some(t=>t.date===row.date && Math.abs(t.amount-row.amount)<0.01 && biNormDesc(t.desc)===biNormDesc(row.desc));
+}
+
+function startBankImport(file){
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'binary'});
+      const sheet=wb.Sheets[wb.SheetNames[0]];
+      BI.rows = XLSX.utils.sheet_to_json(sheet,{header:1, raw:true, defval:''});
+      if(!BI.rows.length){ toast('Could not read any rows from this file','red'); return; }
+      BI.headerRow=1;
+      document.getElementById('bi-header-row').value=1;
+      renderBiRawPreview();
+      document.getElementById('bi-step-header').style.display='block';
+      document.getElementById('bi-step-map').style.display='none';
+      document.getElementById('bi-step-preview').style.display='none';
+      document.getElementById('m-bankimport').classList.add('open');
+    }catch(err){
+      toast('Could not read this file — is it a valid CSV/Excel export?','red');
+    }
+  };
+  reader.readAsBinaryString(file);
+}
+function closeBankImport(){
+  document.getElementById('m-bankimport').classList.remove('open');
+  document.getElementById('bi-input').value='';
+  BI = {rows:null, headerRow:1, colDate:null, colDesc:null, colDebit:null, colCredit:null, colAmount:null, accId:null, parsed:[]};
+}
+function renderBiRawPreview(){
+  const hdrRow = Math.max(1, parseInt(document.getElementById('bi-header-row').value)||1);
+  BI.headerRow = hdrRow;
+  const el=document.getElementById('bi-raw-preview');
+  const preview = BI.rows.slice(0, Math.max(8, hdrRow+3));
+  el.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:12px;">${
+    preview.map((r,i)=>`<tr style="${i+1===hdrRow?'background:rgba(99,102,241,0.14);':''}border-bottom:1px solid rgba(200,200,200,0.08);">
+      <td style="padding:5px 8px;color:var(--muted);font-weight:700;white-space:nowrap;">${i+1===hdrRow?'→ ':''}Row ${i+1}</td>
+      ${r.slice(0,8).map(c=>`<td style="padding:5px 8px;color:var(--ink);white-space:nowrap;">${String(c).slice(0,24)}</td>`).join('')}
+    </tr>`).join('')
+  }</table>`;
+}
+function goToBiMapStep(){
+  const hdrIdx = BI.headerRow-1;
+  const headers = (BI.rows[hdrIdx]||[]).map((h,i)=>String(h||('Column '+(i+1))));
+  const opts = headers.map((h,i)=>`<option value="${i}">${h||('Column '+(i+1))}</option>`).join('');
+  ['bi-col-date','bi-col-desc','bi-col-debit','bi-col-credit','bi-col-amount'].forEach(id=>{
+    document.getElementById(id).innerHTML = opts;
+  });
+  // best-effort auto-detect
+  const findCol=(names)=>headers.findIndex(h=>names.some(n=>h.toLowerCase().includes(n)));
+  const dateIdx=findCol(['date']); if(dateIdx>=0) document.getElementById('bi-col-date').value=dateIdx;
+  const descIdx=findCol(['narration','description','particular','details','remarks']); if(descIdx>=0) document.getElementById('bi-col-desc').value=descIdx;
+  const debitIdx=findCol(['debit','withdrawal','dr amount','dr']); if(debitIdx>=0) document.getElementById('bi-col-debit').value=debitIdx;
+  const creditIdx=findCol(['credit','deposit','cr amount','cr']); if(creditIdx>=0) document.getElementById('bi-col-credit').value=creditIdx;
+  const amtIdx=findCol(['amount']); if(amtIdx>=0) document.getElementById('bi-col-amount').value=amtIdx;
+  const accSel=document.getElementById('bi-account');
+  accSel.innerHTML = S.accounts.map(a=>`<option value="${a.id}">${a.name}</option>`).join('');
+  document.getElementById('bi-step-header').style.display='none';
+  document.getElementById('bi-step-map').style.display='block';
+}
+function backToBiHeaderStep(){
+  document.getElementById('bi-step-map').style.display='none';
+  document.getElementById('bi-step-header').style.display='block';
+}
+function toggleBiAmountMode(){
+  const single=document.getElementById('bi-single-amount').checked;
+  document.getElementById('bi-debit-credit-row').style.display = single?'none':'grid';
+  document.getElementById('bi-single-amount-row').style.display = single?'grid':'none';
+}
+function backToBiMapStep(){
+  document.getElementById('bi-step-preview').style.display='none';
+  document.getElementById('bi-step-map').style.display='block';
+}
+function goToBiPreviewStep(){
+  const hdrIdx=BI.headerRow-1;
+  const dataRows = BI.rows.slice(hdrIdx+1);
+  const colDate=parseInt(document.getElementById('bi-col-date').value);
+  const colDesc=parseInt(document.getElementById('bi-col-desc').value);
+  const single=document.getElementById('bi-single-amount').checked;
+  const accId=parseInt(document.getElementById('bi-account').value);
+  const acc=S.accounts.find(a=>a.id===accId);
+  let colDebit,colCredit,colAmount,sign;
+  if(single){ colAmount=parseInt(document.getElementById('bi-col-amount').value); sign=document.getElementById('bi-amount-sign').value; }
+  else { colDebit=parseInt(document.getElementById('bi-col-debit').value); colCredit=parseInt(document.getElementById('bi-col-credit').value); }
+
+  const parsed=[];
+  dataRows.forEach(r=>{
+    if(!r || r.every(c=>c==='' || c==null)) return; // skip blank rows
+    const date=biParseDate(r[colDate]);
+    const desc=String(r[colDesc]||'').trim();
+    let amount=0, type='expense';
+    if(single){
+      const raw=biParseAmount(r[colAmount]);
+      if(raw===0 && String(r[colAmount]||'').trim()==='') return;
+      if(sign==='neg-expense'){ type = raw<0?'expense':'income'; amount=Math.abs(raw); }
+      else { type = raw<0?'income':'expense'; amount=Math.abs(raw); }
+    } else {
+      const debit=biParseAmount(r[colDebit]), credit=biParseAmount(r[colCredit]);
+      if(debit>0){ type='expense'; amount=debit; }
+      else if(credit>0){ type='income'; amount=credit; }
+      else return; // no amount at all — skip
+    }
+    if(!date || !amount) return;
+    const guess=guessCategoryForRow(desc,type);
+    parsed.push({
+      date, desc: desc||'Bank transaction', type, amount,
+      catId:guess.catId, catName:guess.catName||'', catSource:guess.source,
+      accId, accName:acc?.name,
+      include:true
+    });
+  });
+  parsed.sort((a,b)=>a.date.localeCompare(b.date));
+  BI.parsed=parsed;
+  if(!parsed.length){ toast('No usable rows found — check your column mapping','red'); return; }
+
+  document.getElementById('bi-filter-from').value='';
+  document.getElementById('bi-filter-to').value='';
+  document.getElementById('bi-step-map').style.display='none';
+  document.getElementById('bi-step-preview').style.display='block';
+  renderBiPreviewTable();
+}
+function biCatSelectHtml(row,idx){
+  const cats=S.categories.filter(c=>c.type===row.type);
+  const opts=cats.map(c=>`<option value="${c.id}" ${c.id===row.catId?'selected':''}>${c.name}</option>`).join('');
+  const newOpt = (!row.catId && row.catName) ? `<option value="__new__" selected>${row.catName} (new)</option>` : '';
+  return `<select onchange="BI.parsed[${idx}].catId=this.value==='__new__'?null:parseInt(this.value);BI.parsed[${idx}].catName=this.options[this.selectedIndex].text.replace(' (new)','');" style="width:100%;padding:6px 8px;border-radius:8px;border:1.5px solid rgba(200,200,200,0.14);background:rgba(255,255,255,0.06);color:var(--ink);font-size:12px;font-family:var(--font);">
+    <option value="">-- Uncategorized --</option>${newOpt}${opts}
+  </select>`;
+}
+function renderBiPreviewTable(){
+  const from=document.getElementById('bi-filter-from').value;
+  const to=document.getElementById('bi-filter-to').value;
+  const hideDupes=document.getElementById('bi-hide-dupes').checked;
+  const wrap=document.getElementById('bi-preview-rows');
+  let shown=0, dupCount=0;
+  wrap.innerHTML = BI.parsed.map((row,idx)=>{
+    row._dupe = isDuplicateBiRow(row);
+    if(row._dupe) dupCount++;
+    if(from && row.date<from) return '';
+    if(to && row.date>to) return '';
+    if(hideDupes && row._dupe) return '';
+    shown++;
+    return `<div style="display:grid;grid-template-columns:24px 95px 1fr 90px 90px 150px 34px;gap:6px;align-items:center;${row._dupe?'opacity:0.55;':''}">
+      <input type="checkbox" ${row.include?'checked':''} onchange="BI.parsed[${idx}].include=this.checked" style="width:15px;height:15px;accent-color:#6366f1;">
+      <span style="font-size:12px;color:var(--ink);">${fmtDate(row.date)}</span>
+      <span style="font-size:12.5px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${row.desc}">${row.desc}${row._dupe?' <span style="color:#DC2626;font-weight:700;font-size:10px;">· LIKELY DUPLICATE</span>':''}</span>
+      <span style="font-size:12px;font-weight:700;color:${row.type==='income'?'#16A34A':'#DC2626'};">${row.type==='income'?'Income':'Expense'}</span>
+      <span style="font-size:12.5px;font-weight:700;color:var(--ink);">₹${fmt(row.amount)}</span>
+      ${biCatSelectHtml(row,idx)}
+      <button onclick="BI.parsed[${idx}].include=false;renderBiPreviewTable();" title="Exclude" style="background:none;border:none;color:var(--muted-2);cursor:pointer;font-size:14px;">✕</button>
+    </div>`;
+  }).join('') || `<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">No rows match this filter.</div>`;
+
+  const includedCount = BI.parsed.filter(r=>r.include && !(hideDupes && r._dupe)).length;
+  document.getElementById('bi-summary').textContent = `${shown} shown · ${dupCount} likely duplicate${dupCount===1?'':'s'} found`;
+  document.getElementById('bi-selected-count').textContent = `${includedCount} transaction(s) ready to import${hideDupes&&dupCount?' ('+dupCount+' duplicate'+(dupCount===1?'':'s')+' excluded)':''}`;
+}
+function commitBankImport(){
+  const hideDupes=document.getElementById('bi-hide-dupes').checked;
+  const rows = BI.parsed.filter(r=>r.include && !(hideDupes && r._dupe));
+  if(!rows.length){ toast('No transactions selected','red'); return; }
+  let added=0, blocked=0;
+  rows.forEach(row=>{
+    let catId=row.catId, catName=row.catName, cat=null;
+    if(!catId && catName){
+      cat = S.categories.find(c=>c.name.toLowerCase()===catName.toLowerCase() && c.type===row.type);
+      if(!cat){
+        cat = {id:S.nCat++, name:catName, type:row.type, icon:'', color: row.type==='income'?'#16A34A':'rgba(255,255,255,0.55)'};
+        S.categories.push(cat);
+      }
+      catId=cat.id; catName=cat.name;
+    } else if(catId){
+      cat = S.categories.find(c=>c.id===catId);
+    }
+    const acc=S.accounts.find(a=>a.id===row.accId);
+    if(row.type==='expense' && acc && acc.balance - row.amount < 0){ blocked++; return; }
+    S.transactions.unshift({id:S.nTxn++, type:row.type, amount:row.amount, date:row.date, desc:row.desc,
+      accId:row.accId, catId:catId||null, catName:cat?.name, catIcon:'', catColor:cat?.color, accName:acc?.name});
+    if(acc) acc.balance += row.type==='income' ? row.amount : -row.amount;
+    added++;
+  });
+  saveData();
+  closeBankImport();
+  refreshDash(); renderTxns(); renderAccounts(); renderCats();
+  let msg = added+' transaction'+(added===1?'':'s')+' imported';
+  if(blocked) msg += ' ('+blocked+' skipped — insufficient balance)';
+  toast(msg, blocked?'red':'');
 }
 
 // ══════════════════════════════════════
