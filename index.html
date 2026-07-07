@@ -285,18 +285,43 @@ body.light-mode .dash-widget-handle{background:rgba(0,0,0,0.03);border-color:rgb
 .dr-tab{padding:6px 14px;border-radius:999px;border:none;background:transparent;color:var(--muted);font-size:12px;font-weight:700;font-family:var(--font);cursor:pointer;transition:background 0.15s,color 0.15s;white-space:nowrap;}
 .dr-tab.active{background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;box-shadow:0 2px 10px rgba(99,102,241,0.4);}
 .dr-ticket{display:inline-flex;align-items:center;gap:0;border-radius:14px;overflow:visible;position:relative;}
-.dr-chip{position:relative;display:flex;flex-direction:column;gap:2px;padding:6px 14px 7px;border-radius:12px;
+.dr-chip{position:relative;display:flex;flex-direction:column;gap:4px;padding:8px 14px 9px;border-radius:12px;
   background:linear-gradient(160deg,rgba(99,102,241,0.14),rgba(99,102,241,0.04));
-  border:1.5px solid rgba(99,102,241,0.35);cursor:pointer;min-width:118px;}
+  border:1.5px solid rgba(99,102,241,0.35);cursor:pointer;min-width:150px;}
 .dr-chip:hover{border-color:rgba(99,102,241,0.6);}
 .dr-chip-label{font-size:9px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#818cf8;}
-.dr-chip input[type="date"]{background:transparent;border:none;color:var(--ink);font-family:var(--font);font-size:13px;font-weight:700;padding:0;outline:none;cursor:pointer;width:100%;}
-.dr-chip input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(0.6);cursor:pointer;}
+.dr-chip-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.dr-chip-value{font-family:var(--font);font-size:14.5px;font-weight:700;color:var(--ink);letter-spacing:0.01em;white-space:nowrap;}
+.dr-chip-cal{width:15px;height:15px;flex-shrink:0;color:#818cf8;opacity:0.85;pointer-events:none;}
+.dr-chip input[type="date"]{position:absolute;inset:0;width:100%;height:100%;opacity:0;border:none;padding:0;margin:0;cursor:pointer;}
+.cyc-select{width:100%;padding:9px 30px 9px 14px;border-radius:12px;border:1.5px solid rgba(99,102,241,0.35);
+  background-color:transparent;background-image:linear-gradient(160deg,rgba(99,102,241,0.14),rgba(99,102,241,0.04)),url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23818cf8' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat:no-repeat;background-position:0 0,right 10px center;background-size:100% 100%,14px;
+  color:var(--ink);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;appearance:none;-webkit-appearance:none;-moz-appearance:none;transition:border-color 0.15s;}
+.cyc-select:hover{border-color:rgba(99,102,241,0.6);}
 .dr-arrow{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;
   background:rgba(99,102,241,0.15);color:#818cf8;font-size:13px;flex-shrink:0;position:relative;z-index:2;
   border:1.5px solid rgba(99,102,241,0.35);}
 body.light-mode .dr-chip{background:linear-gradient(160deg,rgba(99,102,241,0.10),rgba(99,102,241,0.02));}
 body.light-mode .dr-tabs{background:rgba(0,0,0,0.03);border-color:rgba(0,0,0,0.1);}
+
+/* ── Privacy mode ── */
+.privacy-sensitive{transition:filter 0.2s ease;}
+body.privacy-on .privacy-sensitive{filter:blur(9px) !important;user-select:none;}
+.privacy-toggle-btn{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--muted);padding:6px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.07);backdrop-filter:blur(16px) saturate(140%);cursor:pointer;font-family:var(--font);transition:background 0.15s,color 0.15s,border-color 0.15s;}
+.privacy-toggle-btn:hover{border-color:rgba(99,102,241,0.5);color:var(--ink);}
+.privacy-toggle-btn.on{background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;border-color:transparent;}
+.privacy-toggle-btn svg{width:14px;height:14px;flex-shrink:0;}
+body.light-mode .privacy-toggle-btn{background:#f0f0f0;border-color:rgba(0,0,0,0.12);color:#555;}
+
+/* ── Master Period control (Analytics) — green theme ── */
+.mst-green .dr-tab.active{background:linear-gradient(135deg,#16A34A,#22c55e) !important;box-shadow:0 2px 10px rgba(22,163,74,0.4) !important;}
+.mst-green .dr-chip{background:linear-gradient(160deg,rgba(22,163,74,0.14),rgba(22,163,74,0.04)) !important;border-color:rgba(22,163,74,0.35) !important;}
+.mst-green .dr-chip:hover{border-color:rgba(22,163,74,0.6) !important;}
+.mst-green .dr-chip-label{color:#4ade80 !important;}
+.mst-green .dr-chip-cal{color:#4ade80 !important;}
+.mst-green .dr-arrow{background:rgba(22,163,74,0.15) !important;color:#4ade80 !important;border-color:rgba(22,163,74,0.35) !important;}
+body.light-mode .mst-green .dr-chip{background:linear-gradient(160deg,rgba(22,163,74,0.10),rgba(22,163,74,0.02)) !important;}
 .dr-span-badge{font-size:11px;color:var(--muted);font-weight:600;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,0.05);border:1px solid rgba(200,200,200,0.12);white-space:nowrap;}
 
 .kpi{
@@ -1586,10 +1611,6 @@ img, canvas { will-change: auto; }
     </div>
     <!-- User pill + theme toggle + sign out — top right -->
     <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
-      <button id="cycle-badge" onclick="openCycleSettings()" title="Set your custom financial month (e.g. salary day)"
-        style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--muted);padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.07);backdrop-filter:blur(16px) saturate(140%);cursor:pointer;font-family:var(--font);">
-        📅 <span id="cycle-badge-label">Calendar month</span>
-      </button>
       <div class="user-name-badge">
         <div class="user-avatar" id="user-avatar">A</div>
         <span id="user-name-disp">User</span>
@@ -1598,6 +1619,10 @@ img, canvas { will-change: auto; }
         <span style="width:7px;height:7px;border-radius:50%;background:#9B9B9B;display:inline-block;"></span>
         <span>Connecting…</span>
       </div>
+      <button id="privacyToggleBtn" class="privacy-toggle-btn" onclick="togglePrivacy()" title="Blur balances and amounts">
+        <svg id="privacyEyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span id="privacyBtnLabel">Privacy</span>
+      </button>
       <!-- ── LIQUID GLASS DARK MODE TOGGLE ── -->
       <div class="theme-toggle-wrap" id="themeToggle" onclick="toggleTheme(event)" title="Toggle light / dark mode">
         <span class="theme-icon" id="themeIconLabel">🌙</span>
@@ -1628,7 +1653,7 @@ img, canvas { will-change: auto; }
     <div class="hero-greeting">Welcome back</div>
     <div class="hero-name" id="hero-name">Good morning!</div>
     <div class="hero-sub">Here's your complete financial overview</div>
-    <div class="hero-stats">
+    <div class="hero-stats privacy-sensitive">
       <div class="hero-stat"><div class="hero-stat-label">Net Worth</div><div class="hero-stat-val" id="hs-balance">₹0</div></div>
       <div class="hero-stat"><div class="hero-stat-label">Income</div><div class="hero-stat-val" id="hs-income">₹0</div></div>
       <div class="hero-stat"><div class="hero-stat-label">Expenses</div><div class="hero-stat-val" id="hs-expense">₹0</div></div>
@@ -1640,7 +1665,7 @@ img, canvas { will-change: auto; }
 
   <div class="dash-widget" data-wid="kpis">
     <div class="dash-widget-handle" draggable="true" ondragstart="dashDragStart(event)" ondragend="dashDragEnd(event)" title="Drag to reorder">⠿ Drag to reorder ⠿</div>
-    <div class="kpi-grid" style="animation:fadeUp 0.5s 0.08s ease both;opacity:0">
+    <div class="kpi-grid privacy-sensitive" style="animation:fadeUp 0.5s 0.08s ease both;opacity:0">
       <div class="kpi glass glass-hover"><div class="kpi-stripe" style="background:linear-gradient(90deg,#6366f1,#818cf8)"></div><div class="kpi-label">Previous Month Balance</div><div class="kpi-value" id="kpi-prev-bal">₹0</div><div class="kpi-sub" id="kpi-prev-bal-sub">Closing balance</div></div>
       <div class="kpi glass glass-hover"><div class="kpi-stripe" style="background:linear-gradient(90deg,#e5e7eb,#9ca3af)"></div><div class="kpi-label">Net Worth</div><div class="kpi-value" id="kpi-bal">₹0</div><div class="kpi-sub">All accounts</div></div>
       <div class="kpi glass glass-hover"><div class="kpi-stripe" style="background:linear-gradient(90deg,#16A34A,#22c55e)"></div><div class="kpi-label">Total Income</div><div class="kpi-value" id="kpi-inc">₹0</div><div class="kpi-sub">All time</div></div>
@@ -1760,7 +1785,7 @@ img, canvas { will-change: auto; }
 <div class="page" id="page-accounts">
 <main>
   <div class="section-head"><div><h2>Accounts <em>&</em> Wallets</h2><p class="meta" id="acc-meta">0 accounts · Click a card to edit</p></div><button class="btn btn-primary" onclick="openModal('account')">+ Add Account</button></div>
-  <div class="acc-grid" id="acc-grid"></div>
+  <div class="acc-grid privacy-sensitive" id="acc-grid"></div>
 </main>
 </div>
 
@@ -1773,14 +1798,14 @@ img, canvas { will-change: auto; }
     <select class="btn btn-ghost" id="f-acc" onchange="renderTxns()" style="cursor:pointer;"><option value="">All Accounts</option></select>
     <select class="btn btn-ghost" id="f-cat" onchange="renderTxns()" style="cursor:pointer;"><option value="">All Categories</option></select>
     <span style="width:1px;height:22px;background:rgba(200,200,200,0.15);margin:0 2px;"></span>
-    <div class="dr-chip" onclick="this.querySelector('input').showPicker?.()"><span class="dr-chip-label">From</span><input type="date" id="f-from" onchange="renderTxns()"></div>
+    <div class="dr-chip" onclick="this.querySelector('input').showPicker?.()"><span class="dr-chip-label">From</span><div class="dr-chip-row"><span class="dr-chip-value" id="f-from-disp">Select date</span><svg class="dr-chip-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><input type="date" id="f-from" onchange="renderTxns()"></div></div>
     <div class="dr-arrow">→</div>
-    <div class="dr-chip" onclick="this.querySelector('input').showPicker?.()"><span class="dr-chip-label">To</span><input type="date" id="f-to" onchange="renderTxns()"></div>
+    <div class="dr-chip" onclick="this.querySelector('input').showPicker?.()"><span class="dr-chip-label">To</span><div class="dr-chip-row"><span class="dr-chip-value" id="f-to-disp">Select date</span><svg class="dr-chip-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><input type="date" id="f-to" onchange="renderTxns()"></div></div>
     <button class="btn btn-ghost btn-sm" onclick="clearTxnDateFilter()">Clear dates</button>
   </div>
   <div class="card glass table-card">
     <div class="card-head"><h3>All Transactions</h3><span class="meta" id="txn-cs">—</span></div>
-    <div class="tscroll"><table><thead><tr><th>Description</th><th>Category</th><th>Account</th><th>Date</th><th class="num">Amount</th><th class="td-del"></th></tr></thead><tbody id="all-txns"></tbody></table></div>
+    <div class="tscroll"><table><thead><tr><th>Description</th><th>Category</th><th>Account</th><th>Date</th><th class="num">Amount</th><th class="td-del"></th></tr></thead><tbody id="all-txns" class="privacy-sensitive"></tbody></table></div>
   </div>
 </main>
 </div>
@@ -1792,7 +1817,7 @@ img, canvas { will-change: auto; }
     <div><h2>Category <em>Budgets</em></h2><p class="meta">Click any budget card to view its transactions</p></div>
     <div class="dr-widget">
       <div class="dr-tabs">
-        <button type="button" class="dr-tab active" data-bgt-mode="month" onclick="setBgtDateMode('month')">📆 By Month</button>
+        <button type="button" class="dr-tab active" data-bgt-mode="month" onclick="setBgtDateMode('month')">By Month</button>
         <button type="button" class="dr-tab" data-bgt-mode="custom" onclick="setBgtDateMode('custom')">Custom Range</button>
       </div>
       <span id="bgt-month-controls" style="display:inline-flex;align-items:center;gap:8px;">
@@ -1801,9 +1826,9 @@ img, canvas { will-change: auto; }
         <button class="btn btn-ghost btn-sm" onclick="jumpBgtViewToday()">Today</button>
       </span>
       <span id="bgt-custom-controls" style="display:none;align-items:center;gap:0;">
-        <div class="dr-chip" onclick="this.querySelector('input').showPicker?.()"><span class="dr-chip-label">From</span><input type="date" id="bgt-from" onchange="onBgtViewDateChange()"></div>
+        <div class="dr-chip" onclick="this.querySelector('input').showPicker?.()"><span class="dr-chip-label">From</span><div class="dr-chip-row"><span class="dr-chip-value" id="bgt-from-disp">Select date</span><svg class="dr-chip-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><input type="date" id="bgt-from" onchange="onBgtViewDateChange()"></div></div>
         <div class="dr-arrow">→</div>
-        <div class="dr-chip" onclick="this.querySelector('input').showPicker?.()"><span class="dr-chip-label">To</span><input type="date" id="bgt-to" onchange="onBgtViewDateChange()"></div>
+        <div class="dr-chip" onclick="this.querySelector('input').showPicker?.()"><span class="dr-chip-label">To</span><div class="dr-chip-row"><span class="dr-chip-value" id="bgt-to-disp">Select date</span><svg class="dr-chip-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><input type="date" id="bgt-to" onchange="onBgtViewDateChange()"></div></div>
       </span>
       <button class="btn btn-primary" onclick="openModal('budget')">+ New Budget</button>
     </div>
@@ -1863,6 +1888,30 @@ img, canvas { will-change: auto; }
     <div style="display:flex;align-items:center;gap:10px;">
       <span style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;"><span style="font-size:15px;">⠿</span> Hover a section to drag and rearrange</span>
       <button class="btn btn-ghost btn-sm" onclick="resetAnalyticsOrder()">Reset Layout</button>
+    </div>
+  </div>
+
+  <div class="card glass mst-green" style="margin-bottom:14px;">
+    <div class="card-head" style="flex-wrap:wrap;gap:10px;">
+      <div>
+        <h3>Master Period</h3>
+        <span class="meta" id="mst-meta">Controls the month/range used across Analytics</span>
+      </div>
+      <div class="dr-widget">
+        <div class="dr-tabs">
+          <button type="button" class="dr-tab active" data-mst-mode="month" onclick="setMstDateMode('month')">By Month</button>
+          <button type="button" class="dr-tab" data-mst-mode="custom" onclick="setMstDateMode('custom')">Custom Range</button>
+        </div>
+        <span id="mst-month-controls" style="display:inline-flex;align-items:center;gap:8px;">
+          <select id="mst-month" onchange="onMstViewDateChange()" style="padding:8px 12px;border-radius:9px;border:1.5px solid rgba(200,200,200,0.18);background:rgba(255,255,255,0.06);color:var(--ink);font-size:12.5px;font-family:var(--font);font-weight:600;cursor:pointer;"></select>
+          <select id="mst-year" onchange="onMstViewDateChange()" style="padding:8px 12px;border-radius:9px;border:1.5px solid rgba(200,200,200,0.18);background:rgba(255,255,255,0.06);color:var(--ink);font-size:12.5px;font-family:var(--font);font-weight:600;cursor:pointer;"></select>
+        </span>
+        <span id="mst-custom-controls" style="display:none;align-items:center;gap:0;">
+          <div class="dr-chip" onclick="this.querySelector('input').showPicker?.()"><span class="dr-chip-label">From</span><div class="dr-chip-row"><span class="dr-chip-value" id="mst-from-disp">Select date</span><svg class="dr-chip-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><input type="date" id="mst-from" onchange="onMstViewDateChange()"></div></div>
+          <div class="dr-arrow">→</div>
+          <div class="dr-chip" onclick="this.querySelector('input').showPicker?.()"><span class="dr-chip-label">To</span><div class="dr-chip-row"><span class="dr-chip-value" id="mst-to-disp">Select date</span><svg class="dr-chip-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><input type="date" id="mst-to" onchange="onMstViewDateChange()"></div></div>
+        </span>
+      </div>
     </div>
   </div>
 
@@ -1989,7 +2038,7 @@ img, canvas { will-change: auto; }
       </div>
       <div class="dr-widget">
         <div class="dr-tabs">
-          <button type="button" class="dr-tab active" data-mbl-mode="month" onclick="setMblDateMode('month')">📆 By Month</button>
+          <button type="button" class="dr-tab active" data-mbl-mode="month" onclick="setMblDateMode('month')">By Month</button>
           <button type="button" class="dr-tab" data-mbl-mode="custom" onclick="setMblDateMode('custom')">Custom Range</button>
         </div>
         <span id="mbl-month-controls" style="display:inline-flex;align-items:center;gap:8px;">
@@ -1997,13 +2046,13 @@ img, canvas { will-change: auto; }
           <select id="mbl-year" onchange="onMblViewDateChange()" style="padding:8px 12px;border-radius:9px;border:1.5px solid rgba(200,200,200,0.18);background:rgba(255,255,255,0.06);color:var(--ink);font-size:12.5px;font-family:var(--font);font-weight:600;cursor:pointer;"></select>
         </span>
         <span id="mbl-custom-controls" style="display:none;align-items:center;gap:0;">
-          <div class="dr-chip" onclick="this.querySelector('input').showPicker?.()"><span class="dr-chip-label">From</span><input type="date" id="mbl-from" onchange="onMblViewDateChange()"></div>
+          <div class="dr-chip" onclick="this.querySelector('input').showPicker?.()"><span class="dr-chip-label">From</span><div class="dr-chip-row"><span class="dr-chip-value" id="mbl-from-disp">Select date</span><svg class="dr-chip-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><input type="date" id="mbl-from" onchange="onMblViewDateChange()"></div></div>
           <div class="dr-arrow">→</div>
-          <div class="dr-chip" onclick="this.querySelector('input').showPicker?.()"><span class="dr-chip-label">To</span><input type="date" id="mbl-to" onchange="onMblViewDateChange()"></div>
+          <div class="dr-chip" onclick="this.querySelector('input').showPicker?.()"><span class="dr-chip-label">To</span><div class="dr-chip-row"><span class="dr-chip-value" id="mbl-to-disp">Select date</span><svg class="dr-chip-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><input type="date" id="mbl-to" onchange="onMblViewDateChange()"></div></div>
         </span>
       </div>
     </div>
-    <div id="mbl-cards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:4px;"></div>
+    <div id="mbl-cards" class="privacy-sensitive" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:4px;"></div>
   </div>
   </div>
 
@@ -2056,7 +2105,7 @@ img, canvas { will-change: auto; }
     <div class="dash-widget-handle" draggable="true" ondragstart="anaDragStart(event)" ondragend="anaDragEnd(event)" title="Drag to reorder">⠿ Drag to reorder ⠿</div>
   <div class="chart-grid g-1-1">
     <div class="card glass"><div class="card-head"><h3>Account Distribution</h3></div><div class="chart-wrap"><canvas id="ch-acc-pie"></canvas></div></div>
-    <div class="card glass"><div class="card-head"><h3>Spending Breakdown</h3></div><div id="cat-breakdown" style="max-height:280px;overflow-y:auto;"></div></div>
+    <div class="card glass"><div class="card-head"><div><h3>Spending Breakdown</h3><span class="meta" id="cat-breakdown-meta"></span></div></div><div id="cat-breakdown" style="max-height:280px;overflow-y:auto;"></div></div>
   </div>
   </div>
 
@@ -2068,7 +2117,7 @@ img, canvas { will-change: auto; }
 <!-- ══════ MODALS ══════ -->
 <!-- Transaction -->
 <div class="modal-bg" id="m-txn">
-  <div class="modal" style="width:620px;">
+  <div class="modal" style="width:620px;" id="m-txn-modal-inner">
     <div class="modal-hdr"><span class="modal-title" id="m-txn-title">Add Transaction</span><button class="modal-close" onclick="closeModal('txn')">✕</button></div>
 
     <!-- Mode tabs (only shown when adding new) -->
@@ -2095,18 +2144,21 @@ img, canvas { will-change: auto; }
     <!-- BULK MODE -->
     <div id="txn-bulk-mode" style="display:none;">
       <div class="fg" style="margin-bottom:14px;">
-        <label>Account</label><select id="tb-acc-default"></select>
+        <label>Default Account <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;">(applies to new rows — override per row below)</span></label><select id="tb-acc-default" onchange="onBulkDefaultAccChange()"></select>
       </div>
-      <!-- Column headers: Date | Type | Amount | Category | Description | ✕ -->
-      <div style="display:grid;grid-template-columns:110px 85px 100px 130px 1fr 28px;gap:5px;margin-bottom:5px;padding:0 2px;">
-        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;">Date</div>
-        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;">Type</div>
-        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;">Amount (₹)</div>
-        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;">Category</div>
-        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;">Description</div>
-        <div></div>
+      <!-- Column headers: Date | Type | Amount | Category | Account | Description | ✕ -->
+      <div style="overflow-x:auto;">
+        <div style="display:grid;grid-template-columns:105px 80px 95px 125px 105px minmax(160px,1fr) 26px;gap:6px;margin-bottom:5px;padding:0 2px;min-width:700px;">
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;">Date</div>
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;">Type</div>
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;">Amount (₹)</div>
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;">Category</div>
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;">Account</div>
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;">Description</div>
+          <div></div>
+        </div>
+        <div id="bulk-txn-rows" style="display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto;padding-right:2px;min-width:700px;"></div>
       </div>
-      <div id="bulk-txn-rows" style="display:flex;flex-direction:column;gap:5px;max-height:320px;overflow-y:auto;padding-right:2px;"></div>
       <button onclick="addBulkTxnRow()" style="width:100%;padding:8px;border-radius:10px;border:1.5px dashed rgba(200,200,200,0.22);background:transparent;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:var(--font);margin-top:8px;margin-bottom:14px;" onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'" onmouseout="this.style.borderColor='rgba(200,200,200,0.22)';this.style.color='var(--muted)'">+ Add row</button>
       <div class="form-actions">
         <span id="bulk-txn-count" style="font-size:12px;color:var(--muted);margin-right:auto;font-weight:600;align-self:center;"></span>
@@ -2250,7 +2302,7 @@ img, canvas { will-change: auto; }
       Budgets, Goals, EMI/Loans, the Dashboard, and Analytics will all group and reset on this cycle instead.
     </p>
     <div class="dr-tabs" style="margin-bottom:16px;">
-      <button type="button" class="dr-tab" data-cyc-mode="calendar" onclick="setCycleModeUI('calendar')">📆 Calendar month</button>
+      <button type="button" class="dr-tab" data-cyc-mode="calendar" onclick="setCycleModeUI('calendar')">Calendar month</button>
       <button type="button" class="dr-tab" data-cyc-mode="custom" onclick="setCycleModeUI('custom')">Custom cycle</button>
     </div>
     <div id="cycle-custom-fields" style="display:none;">
@@ -2260,8 +2312,8 @@ img, canvas { will-change: auto; }
       </label>
       <!-- Single pair — used when NOT varying by month -->
       <div class="fg-row" id="cycle-single-fields">
-        <div class="fg"><label>Cycle starts on day</label><select id="cycle-day-input" style="width:100%;" onchange="updateCyclePreview()"></select></div>
-        <div class="fg"><label>Cycle ends on day</label><select id="cycle-end-input" style="width:100%;" onchange="updateCyclePreview()"></select></div>
+        <div class="fg"><label>Cycle starts on day</label><select id="cycle-day-input" class="cyc-select" onchange="updateCyclePreview()"></select></div>
+        <div class="fg"><label>Cycle ends on day</label><select id="cycle-end-input" class="cyc-select" onchange="updateCyclePreview()"></select></div>
       </div>
       <!-- Per-month grid — used when varying by month -->
       <div id="cycle-per-month-fields" style="display:none;">
@@ -3365,7 +3417,44 @@ function delTxnFromModal(){
   closeModal('txn');renderTxns();saveData();refreshDashDebounced();renderAccounts();toast('Transaction removed');
 }
 let _txnPage=0;
+// ── Privacy mode: blur balances/amounts across the app ──
+const PRIVACY_EYE_OPEN='<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>';
+const PRIVACY_EYE_CLOSED='<path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a20.7 20.7 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 7 11 7a20.7 20.7 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+function togglePrivacy(){
+  const isOn=document.body.classList.toggle('privacy-on');
+  localStorage.setItem('ft-privacy', isOn?'1':'0');
+  applyPrivacyBtnUI(isOn);
+}
+function applyPrivacyBtnUI(isOn){
+  const btn=document.getElementById('privacyToggleBtn'), icon=document.getElementById('privacyEyeIcon'), label=document.getElementById('privacyBtnLabel');
+  if(!btn) return;
+  btn.classList.toggle('on', isOn);
+  if(icon) icon.innerHTML = isOn ? PRIVACY_EYE_CLOSED : PRIVACY_EYE_OPEN;
+  if(label) label.textContent = isOn ? 'Hidden' : 'Privacy';
+}
+(function initPrivacyMode(){
+  const saved = localStorage.getItem('ft-privacy')==='1';
+  if(saved) document.body.classList.add('privacy-on');
+  document.addEventListener('DOMContentLoaded', ()=>applyPrivacyBtnUI(saved));
+})();
+// ── Custom date-range chip display (DD/MM/YYYY, independent of browser locale) ──
+function fmtDMYShort(iso){
+  if(!iso) return 'Select date';
+  const parts=iso.split('-'); if(parts.length!==3) return 'Select date';
+  const [y,m,d]=parts;
+  return `${d}/${m}/${y}`;
+}
+function syncDrChip(inputId,dispId){
+  const inp=document.getElementById(inputId), disp=document.getElementById(dispId);
+  if(inp&&disp) disp.textContent=fmtDMYShort(inp.value);
+}
+function syncAllDrChips(){
+  syncDrChip('f-from','f-from-disp'); syncDrChip('f-to','f-to-disp');
+  syncDrChip('bgt-from','bgt-from-disp'); syncDrChip('bgt-to','bgt-to-disp');
+  syncDrChip('mbl-from','mbl-from-disp'); syncDrChip('mbl-to','mbl-to-disp');
+}
 function renderTxns(resetPage=true){if(resetPage)_txnPage=0;
+  syncAllDrChips();
   ['f-acc','f-cat'].forEach(id=>{const el=document.getElementById(id);if(!el)return;const v=el.value;if(id==='f-acc')el.innerHTML='<option value="">All Accounts</option>'+S.accounts.map(a=>`<option value="${a.id}">${a.name}</option>`).join('');if(id==='f-cat')el.innerHTML='<option value="">All Categories</option>'+S.categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');el.value=v;});
   const ft=document.getElementById('f-type')?.value||'';const fa=document.getElementById('f-acc')?.value||'';const fc=document.getElementById('f-cat')?.value||'';
   const ffrom=document.getElementById('f-from')?.value||'';const fto=document.getElementById('f-to')?.value||'';
@@ -3422,6 +3511,7 @@ function budgetSpent(b){return budgetCatIds(b).reduce((s,id)=>s+spentThisMonth(i
 function budgetCatNames(b){const ids=budgetCatIds(b);const names=ids.map(id=>S.categories.find(c=>c.id===id)?.name||'Unknown');return names.join(' + ')||'Unknown';}
 function budgetCatColor(b){const ids=budgetCatIds(b);const c=S.categories.find(x=>x.id===ids[0]);return c?.color||'#9B9B9B';}
 function renderBudgets(){
+  syncAllDrChips();
   const el=document.getElementById('bgt-list');
   initBgtViewSelectors();
   const info=bgtViewInfo();
@@ -3688,12 +3778,12 @@ function buildCycleMonthRows(){
     return `<tr style="border-top:1px solid rgba(200,200,200,0.08);">
       <td style="padding:7px 12px;color:var(--ink);font-weight:600;">${name}</td>
       <td style="padding:7px 12px;">
-        <select data-cyc-row-start="${m}" onchange="updateCyclePreview()" style="width:100%;padding:6px 8px;border-radius:8px;border:1px solid rgba(200,200,200,0.18);background:rgba(255,255,255,0.05);color:var(--ink);font-family:var(--font);font-size:12.5px;">
+        <select data-cyc-row-start="${m}" onchange="updateCyclePreview()" class="cyc-select" style="font-size:12.5px;padding:6px 26px 6px 10px;">
           ${dayOptionsHtml(false)}
         </select>
       </td>
       <td style="padding:7px 12px;">
-        <select data-cyc-row-end="${m}" onchange="updateCyclePreview()" style="width:100%;padding:6px 8px;border-radius:8px;border:1px solid rgba(200,200,200,0.18);background:rgba(255,255,255,0.05);color:var(--ink);font-family:var(--font);font-size:12.5px;">
+        <select data-cyc-row-end="${m}" onchange="updateCyclePreview()" class="cyc-select" style="font-size:12.5px;padding:6px 26px 6px 10px;">
           ${dayOptionsHtml(true)}
         </select>
       </td>
@@ -3834,12 +3924,30 @@ function jumpBgtViewToday(){
 }
 
 // ══════════════════════════════════════
-// MASTER PERIOD SYNC — Budgets ⇄ Monthly Balance & Savings Lookup
-// Changing the date/month/range in either one automatically applies
-// the same selection to the other, so you never have to set it twice.
+// MASTER PERIOD SYNC — Budgets ⇄ Monthly Balance & Savings Lookup ⇄ Analytics Master Period
+// Changing the date/month/range in any one automatically applies
+// the same selection to the others, so you never have to set it twice.
 // ══════════════════════════════════════
 let masterPeriod={mode:'month',month:null,year:null,from:null,to:null};
 let _syncingMasterPeriod=false;
+function getMasterPeriodRange(){
+  if(masterPeriod.mode==='custom' && masterPeriod.from && masterPeriod.to){
+    return {start:masterPeriod.from, end:masterPeriod.to};
+  }
+  if(masterPeriod.month && masterPeriod.year){
+    const ym=`${masterPeriod.year}-${String(masterPeriod.month).padStart(2,'0')}`;
+    return cycleRangeForKey(ym);
+  }
+  const ym=currentCycleKey();
+  return cycleRangeForKey(ym);
+}
+function pushMasterPeriodToTxnFilter(){
+  const {start,end}=getMasterPeriodRange();
+  const f=document.getElementById('f-from'), t=document.getElementById('f-to');
+  if(f) f.value=start;
+  if(t) t.value=end;
+  renderTxns();
+}
 function updateMasterPeriodFromBudgets(){
   if(_syncingMasterPeriod)return;
   masterPeriod.mode=bgtDateMode;
@@ -3852,7 +3960,10 @@ function updateMasterPeriodFromBudgets(){
   }
   _syncingMasterPeriod=true;
   pushMasterPeriodToMbl();
+  pushMasterPeriodToMst();
   _syncingMasterPeriod=false;
+  renderCatBreakdown();
+  pushMasterPeriodToTxnFilter();
 }
 function updateMasterPeriodFromMbl(){
   if(_syncingMasterPeriod)return;
@@ -3866,7 +3977,81 @@ function updateMasterPeriodFromMbl(){
   }
   _syncingMasterPeriod=true;
   pushMasterPeriodToBudgets();
+  pushMasterPeriodToMst();
   _syncingMasterPeriod=false;
+  renderCatBreakdown();
+  pushMasterPeriodToTxnFilter();
+}
+// ── Master Period (Analytics page-level control) ──
+let mstDateMode='month';
+function setMstDateMode(mode){
+  mstDateMode=mode;
+  document.querySelectorAll('#page-analytics .dr-tab[data-mst-mode]').forEach(t=>t.classList.toggle('active',t.dataset.mstMode===mode));
+  const mc=document.getElementById('mst-month-controls'), cc=document.getElementById('mst-custom-controls');
+  if(mc) mc.style.display = mode==='month' ? 'inline-flex':'none';
+  if(cc) cc.style.display = mode==='custom' ? 'inline-flex':'none';
+  if(mode==='custom'){
+    const fromEl=document.getElementById('mst-from'), toEl=document.getElementById('mst-to');
+    if(fromEl && !fromEl.value){
+      const r=cycleRangeForKey(currentCycleKey());
+      fromEl.value=r.start; toEl.value=r.end;
+    }
+  }
+  syncDrChip('mst-from','mst-from-disp'); syncDrChip('mst-to','mst-to-disp');
+  updateMasterPeriodFromMst();
+}
+function onMstViewDateChange(){ syncDrChip('mst-from','mst-from-disp'); syncDrChip('mst-to','mst-to-disp'); updateMasterPeriodFromMst(); }
+function initMstSelectors(){
+  const mSel=document.getElementById('mst-month'),ySel=document.getElementById('mst-year');
+  if(!mSel||!ySel)return;
+  if(!mSel.options.length){
+    mSel.innerHTML=['January','February','March','April','May','June','July','August','September','October','November','December']
+      .map((n,i)=>`<option value="${i+1}">${n}</option>`).join('');
+  }
+  if(!ySel.options.length){
+    const now=new Date();
+    let minYear=now.getFullYear();
+    S.transactions.forEach(t=>{const y=+t.date.slice(0,4);if(y<minYear)minYear=y;});
+    const years=[];for(let y=now.getFullYear()+1;y>=minYear;y--)years.push(y);
+    ySel.innerHTML=years.map(y=>`<option value="${y}">${y}</option>`).join('');
+    const [cy,cm]=currentCycleKey().split('-');
+    mSel.value=+cm; ySel.value=+cy;
+  }
+}
+function updateMasterPeriodFromMst(){
+  if(_syncingMasterPeriod)return;
+  masterPeriod.mode=mstDateMode;
+  if(mstDateMode==='custom'){
+    masterPeriod.from=document.getElementById('mst-from')?.value||null;
+    masterPeriod.to=document.getElementById('mst-to')?.value||null;
+  } else {
+    masterPeriod.month=parseInt(document.getElementById('mst-month')?.value)||null;
+    masterPeriod.year=parseInt(document.getElementById('mst-year')?.value)||null;
+  }
+  _syncingMasterPeriod=true;
+  pushMasterPeriodToBudgets();
+  pushMasterPeriodToMbl();
+  _syncingMasterPeriod=false;
+  renderCatBreakdown();
+  pushMasterPeriodToTxnFilter();
+}
+function pushMasterPeriodToMst(){
+  initMstSelectors();
+  mstDateMode=masterPeriod.mode;
+  document.querySelectorAll('#page-analytics .dr-tab[data-mst-mode]').forEach(t=>t.classList.toggle('active',t.dataset.mstMode===masterPeriod.mode));
+  const mc=document.getElementById('mst-month-controls'), cc=document.getElementById('mst-custom-controls');
+  if(mc) mc.style.display = masterPeriod.mode==='month' ? 'inline-flex':'none';
+  if(cc) cc.style.display = masterPeriod.mode==='custom' ? 'inline-flex':'none';
+  if(masterPeriod.mode==='custom'){
+    const f=document.getElementById('mst-from'), t=document.getElementById('mst-to');
+    if(f&&masterPeriod.from) f.value=masterPeriod.from;
+    if(t&&masterPeriod.to) t.value=masterPeriod.to;
+  } else if(masterPeriod.month&&masterPeriod.year){
+    const m=document.getElementById('mst-month'), y=document.getElementById('mst-year');
+    if(m) m.value=masterPeriod.month;
+    if(y) y.value=masterPeriod.year;
+  }
+  syncDrChip('mst-from','mst-from-disp'); syncDrChip('mst-to','mst-to-disp');
 }
 function pushMasterPeriodToBudgets(){
   initBgtViewSelectors();
@@ -4317,6 +4502,8 @@ function setTxnMode(mode){
       tab.style.color      = m===mode ? '#fff':'var(--muted)';
     }
   });
+  const modalInner = document.getElementById('m-txn-modal-inner');
+  if(modalInner) modalInner.style.width = mode==='bulk' ? '900px' : '620px';
   if(mode==='bulk') initBulkTxns();
   if(mode==='transfer') initTransfer();
 }
@@ -4344,15 +4531,26 @@ function updateBulkRowCats(typeEl){
   if(!catSel) return;
   catSel.innerHTML = bulkCatOptsForType(typeEl.value);
 }
+function bulkAccOptsHtml(selectedId){
+  return S.accounts.map(a=>`<option value="${a.id}" ${a.id===selectedId?'selected':''}>${a.name}</option>`).join('');
+}
+function onBulkDefaultAccChange(){
+  // Only update rows the user hasn't manually changed away from the previous default
+  const newDef = parseInt(document.getElementById('tb-acc-default').value);
+  document.querySelectorAll('.btr-acc').forEach(sel=>{
+    if(sel.dataset.touched!=='1') sel.value = newDef;
+  });
+}
 function addBulkTxnRow(){
   const container = document.getElementById('bulk-txn-rows');
   const rid = ++bulkTxnRowCount;
   const today = new Date().toISOString().split('T')[0];
   const iStyle = 'padding:6px 8px;border-radius:8px;border:1.5px solid rgba(200,200,200,0.14);font-size:12px;font-family:var(--font);outline:none;color:var(--ink);background:rgba(255,255,255,0.07);width:100%;';
   const defaultCats = bulkCatOptsForType('expense');
+  const defAccId = parseInt(document.getElementById('tb-acc-default')?.value) || (S.accounts[0]&&S.accounts[0].id);
   const div=document.createElement('div');
   div.id='btr-'+rid;
-  div.style.cssText='display:grid;grid-template-columns:110px 85px 100px 130px 1fr 28px;gap:5px;align-items:center;';
+  div.style.cssText='display:grid;grid-template-columns:105px 80px 95px 125px 105px minmax(160px,1fr) 26px;gap:6px;align-items:center;min-width:700px;';
   div.innerHTML=`
     <input type="date" class="btr-date" value="${today}"
       style="${iStyle}" onfocus="this.style.borderColor='rgba(255,255,255,0.3)'" onblur="this.style.borderColor='rgba(200,200,200,0.14)'">
@@ -4367,6 +4565,10 @@ function addBulkTxnRow(){
     <select class="btr-cat"
       style="${iStyle}">
       ${defaultCats}
+    </select>
+    <select class="btr-acc" title="Account for this transaction" onchange="this.dataset.touched='1'"
+      style="${iStyle}">
+      ${bulkAccOptsHtml(defAccId)}
     </select>
     <input type="text" class="btr-desc" placeholder="Description"
       style="${iStyle}" onfocus="this.style.borderColor='rgba(255,255,255,0.3)'" onblur="this.style.borderColor='rgba(200,200,200,0.14)'"
@@ -4385,7 +4587,6 @@ function updateBulkTxnCount(){
 
 function saveBulkTxns(){
   const defAccId = parseInt(document.getElementById('tb-acc-default').value);
-  const acc = S.accounts.find(a=>a.id===defAccId);
   const rows = document.querySelectorAll('#bulk-txn-rows > div');
 
   // ── Validate all filled rows first ──
@@ -4395,19 +4596,23 @@ function saveBulkTxns(){
     const amt    = parseFloat(row.querySelector('.btr-amt')?.value)||0;
     const catVal = row.querySelector('.btr-cat')?.value||'';
     const type   = row.querySelector('.btr-type')?.value||'';
+    const accVal = row.querySelector('.btr-acc')?.value||'';
     if(!amt && !catVal) return; // completely empty row — skip silently
     // Partially filled = error
     const errors = [];
     if(!amt || amt<=0)   errors.push('amount');
     if(!catVal)          errors.push('category');
     if(!type)            errors.push('type');
+    if(!accVal)          errors.push('account');
     if(errors.length){
       validationErrors.push('Row '+(i+1)+': missing '+errors.join(', '));
       // Highlight problem fields
       const amtEl = row.querySelector('.btr-amt');
       const catEl = row.querySelector('.btr-cat');
+      const accEl = row.querySelector('.btr-acc');
       if(amtEl && (!amt||amt<=0))  amtEl.style.borderColor='#DC2626';
       if(catEl && !catVal)         catEl.style.borderColor='#DC2626';
+      if(accEl && !accVal)         accEl.style.borderColor='#DC2626';
     } else {
       // Reset highlight
       row.querySelectorAll('input,select').forEach(el=>el.style.borderColor='');
@@ -4431,9 +4636,11 @@ function saveBulkTxns(){
     const catId  = catVal?parseInt(catVal.split('|')[0]):null;
     const cat    = S.categories.find(c=>c.id===catId);
     const rowDate= row.querySelector('.btr-date')?.value || new Date().toISOString().split('T')[0];
+    const accId  = parseInt(row.querySelector('.btr-acc')?.value) || defAccId;
+    const acc    = S.accounts.find(a=>a.id===accId);
     if(type==='expense' && acc && acc.balance - amt < 0){ blocked++; return; }
     S.transactions.unshift({id:S.nTxn++,type,amount:amt,date:rowDate,desc,
-      accId:defAccId,catId,catName:cat?.name,catIcon:'',catColor:cat?.color,accName:acc?.name});
+      accId,catId,catName:cat?.name,catIcon:'',catColor:cat?.color,accName:acc?.name});
     if(acc) acc.balance += type==='income' ? amt : -amt;
     added++;
   });
@@ -5222,7 +5429,7 @@ function renderBgtTrendChart(){
   ]},options:{...baseOpts,barPercentage:0.6,categoryPercentage:0.7}});
 }
 
-function refreshAnalytics(){renderLineChart();renderAccPie();renderCatBreakdown();renderExportChecklist();initCustomGraph();initMonthlyLookup();applyAnalyticsOrder();}
+function refreshAnalytics(){initMstSelectors();pushMasterPeriodToMst();pushMasterPeriodToTxnFilter();renderLineChart();renderAccPie();renderCatBreakdown();renderExportChecklist();initCustomGraph();initMonthlyLookup();applyAnalyticsOrder();}
 
 // ══════════════════════════════════════
 // MONTHLY BALANCE & SAVINGS LOOKUP
@@ -5277,6 +5484,7 @@ function initMonthlyLookup(){
   renderMonthlyLookup();
 }
 function renderMonthlyLookup(){
+  syncAllDrChips();
   const el=document.getElementById('mbl-cards'); if(!el) return;
   let closingBalance, inc, exp, monthLabel;
   if(mblDateMode==='custom'){
@@ -5448,10 +5656,14 @@ function renderAccPie(){
 
 function renderCatBreakdown(){
   const el=document.getElementById('cat-breakdown');if(!el)return;
-  const totalExp=S.transactions.filter(t=>t.type==='expense'&&!t.isTransfer).reduce((s,t)=>s+t.amount,0);
-  if(!totalExp){el.innerHTML=`<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px">No expense data yet.</div>`;return;}
+  const {start,end}=getMasterPeriodRange();
+  const metaEl=document.getElementById('cat-breakdown-meta');
+  if(metaEl) metaEl.textContent=fmtRangeLabel(start,end);
+  const inRange=t=>t.date>=start&&t.date<=end;
+  const totalExp=S.transactions.filter(t=>t.type==='expense'&&!t.isTransfer&&inRange(t)).reduce((s,t)=>s+t.amount,0);
+  if(!totalExp){el.innerHTML=`<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px">No expense data in this period.</div>`;return;}
   el.innerHTML=S.categories.filter(c=>c.type==='expense').map(c=>{
-    const v=S.transactions.filter(t=>t.type==='expense'&&t.catId===c.id).reduce((s,t)=>s+t.amount,0);if(!v)return'';
+    const v=S.transactions.filter(t=>t.type==='expense'&&t.catId===c.id&&inRange(t)).reduce((s,t)=>s+t.amount,0);if(!v)return'';
     const pct=Math.round(v/totalExp*100);
     return `<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span style="font-weight:700">${c.name}</span><span style="font-size:12px;font-weight:700;color:${c.color}">₹${fmt(v)} <span style="color:var(--muted);font-weight:400">(${pct}%)</span></span></div><div class="prog-wrap"><div class="prog-track"><div class="prog-bar ok" style="width:${pct}%;background:${c.color}"></div></div><span class="prog-num">${pct}%</span></div></div>`;
   }).join('');
