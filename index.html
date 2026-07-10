@@ -10,6 +10,12 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>FinTrack — Personal Finance</title>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#0a0a0a"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="mobile-web-app-capable" content="yes"/>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%23111116%22/%3E%3Crect%20x%3D%221%22%20y%3D%221%22%20width%3D%2262%22%20height%3D%2262%22%20rx%3D%2213%22%20fill%3D%22none%22%20stroke%3D%22%232a2a32%22%20stroke-width%3D%221.5%22/%3E%3Ctext%20x%3D%2232%22%20y%3D%2245%22%20font-family%3D%22Arial%2C%20Helvetica%2C%20sans-serif%22%20font-size%3D%2234%22%20font-weight%3D%22700%22%20fill%3D%22%2316A34A%22%20text-anchor%3D%22middle%22%3E%E2%82%B9%3C/text%3E%3C/svg%3E">
 <!-- Google Identity Services + Drive API -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -1648,6 +1654,8 @@ img, canvas { will-change: auto; }
       <button class="view-tab" onclick="showPage('goals',this);closeMobileNav()">Goals</button>
       <button class="view-tab" onclick="showPage('loans',this);closeMobileNav()">Loans</button>
       <button class="view-tab" onclick="showPage('categories',this);closeMobileNav()">Categories</button>
+      <button class="view-tab" onclick="showPage('passwords',this);closeMobileNav()">Passwords</button>
+      <button class="view-tab" onclick="showPage('splits',this);closeMobileNav()">Splits</button>
       <button class="view-tab" onclick="showPage('analytics',this);closeMobileNav()">Analytics</button>
       <button class="view-tab mobile-nav-signout" style="display:none;" onclick="signOut()">Sign out</button>
     </div>
@@ -1918,6 +1926,50 @@ img, canvas { will-change: auto; }
       <div class="card-head"><h3>Income Categories</h3><span class="meta" id="inc-cat-count">—</span></div>
       <div id="cats-income"></div>
     </div>
+  </div>
+</main>
+</div>
+
+<!-- ── SPLITS ── -->
+<div class="page" id="page-splits">
+<main>
+  <div class="section-head" style="flex-wrap:wrap;gap:10px;">
+    <div><h2>Split <em>Expenses</em></h2><p class="meta">Track shared expenses with friends, Splitwise-style</p></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="openModal('splitfriend')">+ Add Friend</button>
+      <button class="btn btn-primary" onclick="openModal('splitexpense')">+ Add Expense</button>
+    </div>
+  </div>
+
+  <div class="kpi-grid privacy-sensitive" style="grid-template-columns:repeat(3,1fr);">
+    <div class="kpi glass glass-hover"><div class="kpi-stripe" style="background:linear-gradient(90deg,#16A34A,#22c55e)"></div><div class="kpi-label">You Are Owed</div><div class="kpi-value" id="spl-owed">₹0</div><div class="kpi-sub">From friends</div></div>
+    <div class="kpi glass glass-hover"><div class="kpi-stripe" style="background:linear-gradient(90deg,#DC2626,#ef4444)"></div><div class="kpi-label">You Owe</div><div class="kpi-value" id="spl-owe">₹0</div><div class="kpi-sub">To friends</div></div>
+    <div class="kpi glass glass-hover"><div class="kpi-stripe" style="background:linear-gradient(90deg,#6366f1,#818cf8)"></div><div class="kpi-label">Net Balance</div><div class="kpi-value" id="spl-net">₹0</div><div class="kpi-sub">Owed minus owing</div></div>
+  </div>
+
+  <div class="section-head" style="margin-bottom:12px;"><div><h3 style="margin:0;">Friends</h3></div></div>
+  <div class="acc-grid" id="spl-friends-grid" style="margin-bottom:28px;"></div>
+
+  <div class="card glass table-card">
+    <div class="card-head"><h3>All Split Expenses</h3><span class="meta" id="spl-exp-cs">—</span></div>
+    <div class="tscroll"><table><thead><tr><th>Description</th><th>Paid By</th><th class="num">Total</th><th class="num">Your Share</th><th>Date</th><th class="td-del"></th></tr></thead><tbody id="all-splits" class="privacy-sensitive"></tbody></table></div>
+  </div>
+</main>
+</div>
+
+<!-- ── PASSWORDS ── -->
+<div class="page" id="page-passwords">
+<main>
+  <div class="section-head">
+    <div><h2>Password <em>Vault</em></h2><p class="meta" id="pwd-meta">0 saved · Click any row to edit</p></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="exportPasswordsExcel()">⬇ Export to Excel</button>
+      <button class="btn btn-primary" onclick="openModal('password')">+ Add Password</button>
+    </div>
+  </div>
+  <div class="card glass table-card">
+    <div class="card-head"><h3>Saved Logins</h3><span class="meta" id="pwd-cs">—</span></div>
+    <div class="tscroll"><table><thead><tr><th>Website / Site</th><th>Username</th><th>Password</th><th class="td-del"></th></tr></thead><tbody id="all-pwds"></tbody></table></div>
   </div>
 </main>
 </div>
@@ -2365,6 +2417,88 @@ img, canvas { will-change: auto; }
     </div>
   </div>
 </div>
+<!-- Password -->
+<div class="modal-bg" id="m-password">
+  <div class="modal">
+    <div class="modal-hdr"><span class="modal-title" id="m-pwd-title">Add Password</span><button class="modal-close" onclick="closeModal('password')">✕</button></div>
+    <div class="fg"><label>Website / Site Name</label><input type="text" id="p-site" placeholder="e.g. Gmail, Netflix, HDFC NetBanking"></div>
+    <div class="fg"><label>Username / Email</label><input type="text" id="p-user" placeholder="e.g. yourname@email.com"></div>
+    <div class="fg">
+      <label>Password</label>
+      <div style="position:relative;">
+        <input type="password" id="p-pass" placeholder="Password" style="width:100%;padding-right:40px;">
+        <button type="button" onclick="togglePwdModalVisibility()" id="p-pass-eye" title="Show/Hide" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="fg"><label>Notes <span style="font-weight:400;color:var(--muted);">(optional)</span></label><input type="text" id="p-notes" placeholder="e.g. security question, PIN, recovery info"></div>
+    <div class="form-actions">
+      <button class="btn btn-danger btn-sm" id="p-del-btn" style="display:none;margin-right:auto" onclick="delPwdFromModal()">Delete</button>
+      <button class="btn btn-ghost" onclick="closeModal('password')">Cancel</button>
+      <button class="btn btn-primary" id="p-save-btn" onclick="savePwd()">Add Password</button>
+    </div>
+  </div>
+</div>
+<!-- Split Friend -->
+<div class="modal-bg" id="m-splitfriend">
+  <div class="modal">
+    <div class="modal-hdr"><span class="modal-title" id="m-splf-title">Add Friend</span><button class="modal-close" onclick="closeModal('splitfriend')">✕</button></div>
+    <div class="fg"><label>Friend's Name</label><input type="text" id="splf-name" placeholder="e.g. Rahul, Priya"></div>
+    <div class="form-actions">
+      <button class="btn btn-danger btn-sm" id="splf-del-btn" style="display:none;margin-right:auto" onclick="delSplitFriendFromModal()">Delete</button>
+      <button class="btn btn-ghost" onclick="closeModal('splitfriend')">Cancel</button>
+      <button class="btn btn-primary" id="splf-save-btn" onclick="saveSplitFriend()">Add Friend</button>
+    </div>
+  </div>
+</div>
+<!-- Split Expense -->
+<div class="modal-bg" id="m-splitexpense">
+  <div class="modal" style="width:560px;">
+    <div class="modal-hdr"><span class="modal-title" id="m-sple-title">Add Split Expense</span><button class="modal-close" onclick="closeModal('splitexpense')">✕</button></div>
+    <div class="fg"><label>Description</label><input type="text" id="sple-desc" placeholder="e.g. Dinner at restaurant, Goa trip cab"></div>
+    <div class="fg-row">
+      <div class="fg"><label>Total Amount (₹)</label><input type="number" id="sple-amt" placeholder="0" min="0" step="0.01" oninput="onSplitExpenseAmountChange()"></div>
+      <div class="fg"><label>Date</label><input type="date" id="sple-date"></div>
+    </div>
+    <div class="fg"><label>Paid By</label><select id="sple-paidby" onchange="onSplitExpensePaidByChange()"></select></div>
+    <div class="fg">
+      <label style="display:flex;justify-content:space-between;align-items:center;">
+        <span>Split Between</span>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="splitExpenseEqually()">Split Equally</button>
+      </label>
+      <div id="sple-participants" style="display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto;padding-right:2px;margin-top:6px;"></div>
+      <div id="sple-sum-warning" style="display:none;font-size:12px;color:#DC2626;margin-top:8px;font-weight:600;"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-danger btn-sm" id="sple-del-btn" style="display:none;margin-right:auto" onclick="delSplitExpenseFromModal()">Delete</button>
+      <button class="btn btn-ghost" onclick="closeModal('splitexpense')">Cancel</button>
+      <button class="btn btn-primary" id="sple-save-btn" onclick="saveSplitExpense()">Add Expense</button>
+    </div>
+  </div>
+</div>
+<!-- Settle Up -->
+<div class="modal-bg" id="m-splitsettle">
+  <div class="modal">
+    <div class="modal-hdr"><span class="modal-title">Settle Up</span><button class="modal-close" onclick="closeModal('splitsettle')">✕</button></div>
+    <div class="fg"><label>Friend</label><select id="spls-friend"></select></div>
+    <div class="fg">
+      <label>Direction</label>
+      <div class="type-toggle">
+        <div class="type-btn active-exp" id="spls-tb-ipaid" onclick="setSplitSettleDir('i_paid')">I Paid Them</div>
+        <div class="type-btn" id="spls-tb-theypaid" onclick="setSplitSettleDir('they_paid')">They Paid Me</div>
+      </div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label>Amount (₹)</label><input type="number" id="spls-amt" placeholder="0" min="0" step="0.01"></div>
+      <div class="fg"><label>Date</label><input type="date" id="spls-date"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="closeModal('splitsettle')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSplitSettlement()">Record Settlement</button>
+    </div>
+  </div>
+</div>
 <!-- Category -->
 <div class="modal-bg" id="m-category">
   <div class="modal" style="width:580px;">
@@ -2760,6 +2894,8 @@ function refreshAllViews(){
   renderBudgets?.();
   renderGoals?.();
   renderLoans?.();
+  renderPasswords?.();
+  renderSplits?.();
 }
 
 function signOut(){
@@ -2770,8 +2906,10 @@ function signOut(){
   }
   currentUser = null;
   driveAccessToken = null; driveFileId = null;
-  S.accounts=[];S.transactions=[];S.categories=[];S.budgets=[];S.goals=[];S.loans=[];
-  S.nAcc=1;S.nTxn=1;S.nCat=1;S.nBgt=1;S.nGoal=1;S.nLoan=1;
+  S.accounts=[];S.transactions=[];S.categories=[];S.budgets=[];S.goals=[];S.loans=[];S.passwords=[];
+  S.splitFriends=[];S.splitExpenses=[];S.splitSettlements=[];
+  S.nAcc=1;S.nTxn=1;S.nCat=1;S.nBgt=1;S.nGoal=1;S.nLoan=1;S.nPwd=1;
+  S.nSplitFriend=1;S.nSplitExpense=1;S.nSplitSettlement=1;
   document.getElementById('app-shell').style.display = 'none';
   document.getElementById('pg-signin').style.display  = 'flex';
   document.getElementById('si-name').value = '';
@@ -2869,12 +3007,20 @@ function applyData(data){
   if(data.goals)        S.goals        = data.goals;
   if(data.loans)        S.loans        = data.loans;
   if(data.categories)   S.categories   = data.categories;
+  if(data.passwords)    S.passwords    = data.passwords;
+  if(data.splitFriends)     S.splitFriends     = data.splitFriends;
+  if(data.splitExpenses)    S.splitExpenses    = data.splitExpenses;
+  if(data.splitSettlements) S.splitSettlements = data.splitSettlements;
   if(data.nAcc)         S.nAcc         = data.nAcc;
   if(data.nTxn)         S.nTxn         = data.nTxn;
   if(data.nBgt)         S.nBgt         = data.nBgt;
   if(data.nGoal)        S.nGoal        = data.nGoal;
   if(data.nLoan)        S.nLoan        = data.nLoan;
   if(data.nCat)         S.nCat         = data.nCat;
+  if(data.nPwd)         S.nPwd         = data.nPwd;
+  if(data.nSplitFriend)     S.nSplitFriend     = data.nSplitFriend;
+  if(data.nSplitExpense)    S.nSplitExpense    = data.nSplitExpense;
+  if(data.nSplitSettlement) S.nSplitSettlement = data.nSplitSettlement;
   if(data.settings)     S.settings     = {cycleStartDay:1, ...data.settings};
   if(data.dashOrder)      S.dashOrder      = data.dashOrder;
   if(data.analyticsOrder) S.analyticsOrder = data.analyticsOrder;
@@ -2887,6 +3033,11 @@ function applyData(data){
     b.catId=b.catIds[0]; });
   S.goals.forEach(g=>{ g.target=+g.target; g.saved=+g.saved; g.id=+g.id; });
   S.loans.forEach(l=>{ l.total=+l.total; l.emi=+(l.emi||0); l.paid=+(l.paid||0); l.emisPaid=+(l.emisPaid||0); l.totalEmis=+(l.totalEmis||0); l.id=+l.id; });
+  S.passwords.forEach(p=>{ p.id=+p.id; });
+  S.splitFriends.forEach(f=>{ f.id=+f.id; });
+  S.splitExpenses.forEach(e=>{ e.id=+e.id; e.amount=+e.amount; e.paidBy=(e.paidBy==='me')?'me':+e.paidBy;
+    (e.participants||[]).forEach(p=>{ p.id=(p.id==='me')?'me':+p.id; p.share=+p.share; }); });
+  S.splitSettlements.forEach(s=>{ s.id=+s.id; s.amount=+s.amount; s.friendId=+s.friendId; });
 }
 
 // ── Save to Drive (debounced 1s) ──
@@ -2906,9 +3057,12 @@ async function _doDriveSave(){
       accounts:S.accounts, transactions:S.transactions,
       budgets:S.budgets, goals:S.goals, loans:S.loans,
       categories:S.categories, settings:S.settings,
+      passwords:S.passwords,
+      splitFriends:S.splitFriends, splitExpenses:S.splitExpenses, splitSettlements:S.splitSettlements,
       dashOrder:S.dashOrder, analyticsOrder:S.analyticsOrder,
       nAcc:S.nAcc, nTxn:S.nTxn, nCat:S.nCat,
-      nBgt:S.nBgt, nGoal:S.nGoal, nLoan:S.nLoan,
+      nBgt:S.nBgt, nGoal:S.nGoal, nLoan:S.nLoan, nPwd:S.nPwd,
+      nSplitFriend:S.nSplitFriend, nSplitExpense:S.nSplitExpense, nSplitSettlement:S.nSplitSettlement,
     });
     const boundary = 'ft_boundary_2024';
     const body = `--${boundary}
@@ -2940,9 +3094,12 @@ function saveLocalBackup(){
       accounts:S.accounts, transactions:S.transactions,
       budgets:S.budgets, goals:S.goals, loans:S.loans,
       categories:S.categories, settings:S.settings,
+      passwords:S.passwords,
+      splitFriends:S.splitFriends, splitExpenses:S.splitExpenses, splitSettlements:S.splitSettlements,
       dashOrder:S.dashOrder, analyticsOrder:S.analyticsOrder,
       nAcc:S.nAcc, nTxn:S.nTxn, nCat:S.nCat,
-      nBgt:S.nBgt, nGoal:S.nGoal, nLoan:S.nLoan,
+      nBgt:S.nBgt, nGoal:S.nGoal, nLoan:S.nLoan, nPwd:S.nPwd,
+      nSplitFriend:S.nSplitFriend, nSplitExpense:S.nSplitExpense, nSplitSettlement:S.nSplitSettlement,
       savedAt: new Date().toISOString(),
     }));
   } catch(e){}
@@ -2990,8 +3147,10 @@ function saveData(){
 function clearData(){
   // Reset all state
   S.accounts=[];S.transactions=[];S.categories=[];
-  S.budgets=[];S.goals=[];S.loans=[];
-  S.nAcc=1;S.nTxn=1;S.nCat=1;S.nBgt=1;S.nGoal=1;S.nLoan=1;
+  S.budgets=[];S.goals=[];S.loans=[];S.passwords=[];
+  S.splitFriends=[];S.splitExpenses=[];S.splitSettlements=[];
+  S.nAcc=1;S.nTxn=1;S.nCat=1;S.nBgt=1;S.nGoal=1;S.nLoan=1;S.nPwd=1;
+  S.nSplitFriend=1;S.nSplitExpense=1;S.nSplitSettlement=1;
   // Clear localStorage
   try{ localStorage.removeItem(localKey()); } catch(e){}
   // Clear Drive — write empty snapshot
@@ -3034,6 +3193,8 @@ function executeWipe(){
     renderGoals();
     renderLoans();
     renderCats();
+    renderPasswords();
+    renderSplits();
     refreshAnalytics();
     toast('All data wiped. Starting fresh.');
   }, 200);
@@ -3084,12 +3245,16 @@ const S={
   transactions:[],
   categories:[],
   budgets:[],goals:[],loans:[],
-  nAcc:1,nTxn:1,nCat:1,nBgt:1,nGoal:1,nLoan:1,
+  passwords:[],
+  splitFriends:[],splitExpenses:[],splitSettlements:[],
+  nAcc:1,nTxn:1,nCat:1,nBgt:1,nGoal:1,nLoan:1,nPwd:1,
+  nSplitFriend:1,nSplitExpense:1,nSplitSettlement:1,
   settings:{cycleStartDay:1},
 };
 let TT='expense',CT='expense';
 let selIcon='',selAccTheme=0,selCatClr='rgba(255,255,255,0.55)';
-let editTxnId=null,editAccId=null,editBgtId=null,editGoalId=null,editLoanId=null;
+let editTxnId=null,editAccId=null,editBgtId=null,editGoalId=null,editLoanId=null,editPwdId=null;
+let editSplitFriendId=null,editSplitExpenseId=null,splitSettleDir='i_paid';
 const CH={};
 
 // ── NAV ──
@@ -3099,14 +3264,14 @@ function showPage(name,el){
   document.getElementById('page-'+name).classList.add('active');
   if(el)el.classList.add('active');
   else document.querySelectorAll('.view-tab').forEach(t=>{if(t.getAttribute('onclick')?.includes("'"+name+"'"))t.classList.add('active');});
-  const fn={dashboard:refreshDash,analytics:refreshAnalytics,transactions:renderTxns,accounts:renderAccounts,categories:renderCats,budgets:renderBudgets,goals:renderGoals,loans:renderLoans};
+  const fn={dashboard:refreshDash,analytics:refreshAnalytics,transactions:renderTxns,accounts:renderAccounts,categories:renderCats,budgets:renderBudgets,goals:renderGoals,loans:renderLoans,passwords:renderPasswords,splits:renderSplits};
   fn[name]?.();
 }
 
 // ── MODALS ──
 function openModal(name,id){
   // Reset editing state
-  editTxnId=null;editAccId=null;editBgtId=null;editGoalId=null;editLoanId=null;editCatId=null;
+  editTxnId=null;editAccId=null;editBgtId=null;editGoalId=null;editLoanId=null;editCatId=null;editPwdId=null;editSplitFriendId=null;editSplitExpenseId=null;
   if(name==='category'){openCatModal(id);return;}
 
   if(name==='txn'){
@@ -3212,6 +3377,64 @@ function openModal(name,id){
       const ed=document.getElementById('l-end-display');if(ed)ed.textContent='—';
       window._loanEndDate='';
     }
+  }
+  if(name==='password'){
+    editPwdId=id||null;
+    document.getElementById('p-del-btn').style.display=id?'inline-flex':'none';
+    document.getElementById('m-pwd-title').textContent=id?'Edit Password':'Add Password';
+    document.getElementById('p-save-btn').textContent=id?'Save Changes':'Add Password';
+    const passInput=document.getElementById('p-pass');
+    passInput.type='password';
+    document.getElementById('p-pass-eye').innerHTML='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>';
+    if(id){
+      const p=S.passwords.find(x=>x.id===id);
+      document.getElementById('p-site').value=p.site;
+      document.getElementById('p-user').value=p.username;
+      document.getElementById('p-pass').value=p.password;
+      document.getElementById('p-notes').value=p.notes||'';
+    } else {
+      ['p-site','p-user','p-pass','p-notes'].forEach(x=>document.getElementById(x).value='');
+    }
+  }
+  if(name==='splitfriend'){
+    editSplitFriendId=id||null;
+    document.getElementById('splf-del-btn').style.display=id?'inline-flex':'none';
+    document.getElementById('m-splf-title').textContent=id?'Edit Friend':'Add Friend';
+    document.getElementById('splf-save-btn').textContent=id?'Save Changes':'Add Friend';
+    if(id){
+      const f=S.splitFriends.find(x=>x.id===id);
+      document.getElementById('splf-name').value=f.name;
+    } else {
+      document.getElementById('splf-name').value='';
+    }
+  }
+  if(name==='splitexpense'){
+    editSplitExpenseId=id||null;
+    document.getElementById('sple-del-btn').style.display=id?'inline-flex':'none';
+    document.getElementById('m-sple-title').textContent=id?'Edit Split Expense':'Add Split Expense';
+    document.getElementById('sple-save-btn').textContent=id?'Save Changes':'Add Expense';
+    fillSplitPaidBySelect();
+    if(id){
+      const e=S.splitExpenses.find(x=>x.id===id);
+      document.getElementById('sple-desc').value=e.desc;
+      document.getElementById('sple-amt').value=e.amount;
+      document.getElementById('sple-date').value=e.date;
+      document.getElementById('sple-paidby').value=e.paidBy;
+      buildSplitParticipantsUI(e.participants);
+    } else {
+      document.getElementById('sple-desc').value='';
+      document.getElementById('sple-amt').value='';
+      document.getElementById('sple-date').value=new Date().toISOString().split('T')[0];
+      document.getElementById('sple-paidby').value='me';
+      buildSplitParticipantsUI(null);
+    }
+  }
+  if(name==='splitsettle'){
+    fillSplitSettleFriendSelect();
+    setSplitSettleDir('i_paid');
+    document.getElementById('spls-amt').value='';
+    document.getElementById('spls-date').value=new Date().toISOString().split('T')[0];
+    if(id) document.getElementById('spls-friend').value=id;
   }
   document.getElementById('m-'+name).classList.add('open');
 }
@@ -3360,6 +3583,304 @@ function renderAccounts(){
   document.getElementById('acc-meta').textContent=`${S.accounts.length} account${S.accounts.length!==1?'s':''} · Click a card to edit`;
 }
 function delAccDirect(id){if(!confirm('Delete account and its transactions?'))return;S.accounts=S.accounts.filter(a=>a.id!==id);S.transactions=S.transactions.filter(t=>t.accId!==id);renderAccounts();refreshDash();saveData();toast('Account removed');}
+
+// ── PASSWORDS ──
+function togglePwdModalVisibility(){
+  const inp=document.getElementById('p-pass');
+  const eye=document.getElementById('p-pass-eye');
+  const showIcon='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.94 10.94 0 0112 20c-7 0-11-8-11-8a18.5 18.5 0 015.06-5.94M9.9 4.24A10.94 10.94 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19M1 1l22 22"/><path d="M14.12 14.12a3 3 0 11-4.24-4.24"/></svg>';
+  const hideIcon='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>';
+  if(inp.type==='password'){ inp.type='text'; eye.innerHTML=showIcon; }
+  else { inp.type='password'; eye.innerHTML=hideIcon; }
+}
+function savePwd(){
+  const site=document.getElementById('p-site').value.trim();
+  const username=document.getElementById('p-user').value.trim();
+  const password=document.getElementById('p-pass').value;
+  const notes=document.getElementById('p-notes').value.trim();
+  if(!site){toast('Enter a website/site name','red');return;}
+  if(!password){toast('Enter a password','red');return;}
+  if(editPwdId){
+    const p=S.passwords.find(x=>x.id===editPwdId);
+    p.site=site;p.username=username;p.password=password;p.notes=notes;
+    saveData();toast('Password updated');
+  } else {
+    S.passwords.push({id:S.nPwd++,site,username,password,notes});
+    saveData();toast('Password added');
+  }
+  closeModal('password');renderPasswords();
+}
+function delPwdFromModal(){
+  if(!confirm('Delete this saved password?'))return;
+  S.passwords=S.passwords.filter(p=>p.id!==editPwdId);
+  closeModal('password');renderPasswords();saveData();toast('Password removed');
+}
+function delPwdDirect(id){
+  if(!confirm('Delete this saved password?'))return;
+  S.passwords=S.passwords.filter(p=>p.id!==id);
+  renderPasswords();saveData();toast('Password removed');
+}
+function togglePwdRowVisibility(id){
+  const span=document.getElementById('pwd-mask-'+id);
+  const p=S.passwords.find(x=>x.id===id);
+  if(!span||!p)return;
+  const isMasked=span.dataset.masked!=='0';
+  span.textContent = isMasked ? p.password : '•'.repeat(Math.max(8,(p.password||'').length));
+  span.dataset.masked = isMasked ? '0' : '1';
+  const btn=document.getElementById('pwd-eye-'+id);
+  if(btn) btn.textContent = isMasked ? 'Hide' : 'Show';
+}
+function renderPasswords(){
+  const tb=document.getElementById('all-pwds');
+  if(!tb)return;
+  tb.innerHTML=S.passwords.map(p=>`
+    <tr>
+      <td onclick="openModal('password',${p.id})" style="cursor:pointer;">${escHtmlPwd(p.site)}</td>
+      <td onclick="openModal('password',${p.id})" style="cursor:pointer;">${escHtmlPwd(p.username)||'—'}</td>
+      <td><span id="pwd-mask-${p.id}" data-masked="1" style="font-family:monospace;letter-spacing:1px;">${'•'.repeat(Math.max(8,(p.password||'').length))}</span>
+        <button class="btn btn-ghost btn-sm" id="pwd-eye-${p.id}" style="margin-left:8px;padding:2px 8px;" onclick="event.stopPropagation();togglePwdRowVisibility(${p.id})">Show</button>
+      </td>
+      <td class="td-del"><button class="acc-action-btn del" onclick="event.stopPropagation();delPwdDirect(${p.id})" title="Delete">Del</button></td>
+    </tr>`).join('') || `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">No passwords saved yet. Click "+ Add Password" to save your first login.</td></tr>`;
+  const meta=document.getElementById('pwd-meta');
+  if(meta) meta.textContent=`${S.passwords.length} saved · Click any row to edit`;
+  const cs=document.getElementById('pwd-cs');
+  if(cs) cs.textContent=`${S.passwords.length} record${S.passwords.length!==1?'s':''}`;
+}
+function escHtmlPwd(s){
+  return (s==null?'':String(s)).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function exportPasswordsExcel(){
+  if(!S.passwords.length){toast('No passwords to export','red');return;}
+  const wb=XLSX.utils.book_new();
+  const rows=S.passwords.map(p=>({
+    'Website/Site':p.site,
+    'Username':p.username||'',
+    'Password':p.password||'',
+    'Notes':p.notes||'',
+  }));
+  const ws=XLSX.utils.json_to_sheet(rows);
+  ws['!cols']=[{wch:28},{wch:28},{wch:22},{wch:30}];
+  XLSX.utils.book_append_sheet(wb,ws,'Passwords');
+  const ts=new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb,`FinTrack_Passwords_${ts}.xlsx`);
+  toast('Passwords exported');
+}
+
+// ══════════════════════════════════════
+// SPLITS — Splitwise-style shared expenses
+// ══════════════════════════════════════
+
+// ── Friends ──
+function saveSplitFriend(){
+  const name=document.getElementById('splf-name').value.trim();
+  if(!name){toast('Enter a name','red');return;}
+  if(editSplitFriendId){
+    const f=S.splitFriends.find(x=>x.id===editSplitFriendId);
+    f.name=name;
+    saveData();toast('Friend updated');
+  } else {
+    S.splitFriends.push({id:S.nSplitFriend++,name});
+    saveData();toast('Friend added');
+  }
+  closeModal('splitfriend');renderSplits();
+}
+function delSplitFriendFromModal(){
+  if(!confirm('Delete this friend? Their past split expenses will be kept but will no longer show their name.'))return;
+  S.splitFriends=S.splitFriends.filter(f=>f.id!==editSplitFriendId);
+  closeModal('splitfriend');renderSplits();saveData();toast('Friend removed');
+}
+function delSplitFriendDirect(id){
+  if(!confirm('Delete this friend? Their past split expenses will be kept but will no longer show their name.'))return;
+  S.splitFriends=S.splitFriends.filter(f=>f.id!==id);
+  renderSplits();saveData();toast('Friend removed');
+}
+
+// ── Expense modal helpers ──
+function fillSplitPaidBySelect(){
+  const sel=document.getElementById('sple-paidby');
+  sel.innerHTML = `<option value="me">Me</option>` + S.splitFriends.map(f=>`<option value="${f.id}">${escHtmlPwd(f.name)}</option>`).join('');
+}
+function buildSplitParticipantsUI(existing){
+  const wrap=document.getElementById('sple-participants');
+  if(!S.splitFriends.length){
+    wrap.innerHTML=`<div style="color:var(--muted);font-size:13px;padding:8px 0;">Add a friend first using "+ Add Friend", then come back to split an expense.</div>`;
+    return;
+  }
+  const existingIds = existing ? existing.map(x=>String(x.id)) : null;
+  const people=[{id:'me',name:'Me'}, ...S.splitFriends.map(f=>({id:f.id,name:f.name}))];
+  wrap.innerHTML = people.map(p=>{
+    const checked = existingIds ? existingIds.includes(String(p.id)) : true;
+    const found = existing ? existing.find(x=>String(x.id)===String(p.id)) : null;
+    const shareVal = found ? found.share : '';
+    return `<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;border:1px solid rgba(200,200,200,0.15);background:rgba(255,255,255,0.04);cursor:pointer;">
+      <input type="checkbox" class="sple-part-chk" value="${p.id}" ${checked?'checked':''} onchange="onSplitParticipantToggle(this)">
+      <span style="flex:1;font-size:13px;font-weight:600;">${escHtmlPwd(p.name)}</span>
+      <input type="number" class="sple-part-share" value="${shareVal}" step="0.01" min="0" placeholder="0.00" style="width:100px;padding:6px 8px;border-radius:6px;border:1px solid rgba(200,200,200,0.2);background:rgba(255,255,255,0.06);color:var(--ink);font-family:var(--font);" ${checked?'':'disabled'} onclick="event.stopPropagation();">
+    </label>`;
+  }).join('');
+  if(!existing) splitExpenseEqually();
+}
+function onSplitParticipantToggle(cb){
+  const input=cb.closest('label').querySelector('.sple-part-share');
+  input.disabled=!cb.checked;
+  if(!cb.checked) input.value='';
+}
+function splitExpenseEqually(){
+  const amt=parseFloat(document.getElementById('sple-amt').value)||0;
+  const checks=Array.from(document.querySelectorAll('.sple-part-chk')).filter(c=>c.checked);
+  if(!checks.length){toast('Select at least one participant','red');return;}
+  const each=amt/checks.length;
+  checks.forEach(c=>{ c.closest('label').querySelector('.sple-part-share').value = each?each.toFixed(2):''; });
+}
+function onSplitExpenseAmountChange(){ /* amount changes don't auto-recalc; use "Split Equally" */ }
+function onSplitExpensePaidByChange(){ /* reserved */ }
+
+// ── Save / delete expense ──
+function saveSplitExpense(){
+  const desc=document.getElementById('sple-desc').value.trim();
+  const amt=parseFloat(document.getElementById('sple-amt').value)||0;
+  const date=document.getElementById('sple-date').value;
+  const paidByRaw=document.getElementById('sple-paidby').value;
+  if(!desc){toast('Enter a description','red');return;}
+  if(!amt||amt<=0){toast('Enter a valid amount','red');return;}
+  const checks=Array.from(document.querySelectorAll('.sple-part-chk')).filter(c=>c.checked);
+  if(!checks.length){toast('Select at least one participant to split with','red');return;}
+  const participants=checks.map(c=>{
+    const input=c.closest('label').querySelector('.sple-part-share');
+    return {id: c.value==='me'?'me':+c.value, share: parseFloat(input.value)||0};
+  });
+  const totalShares=participants.reduce((s,p)=>s+p.share,0);
+  const warn=document.getElementById('sple-sum-warning');
+  if(Math.abs(totalShares-amt)>0.5){
+    warn.style.display='block';
+    warn.textContent=`Shares total ₹${fmt(totalShares)} but the expense is ₹${fmt(amt)}.`;
+    if(!confirm(`Shares total ₹${fmt(totalShares)} but the expense is ₹${fmt(amt)}. Save anyway?`)) return;
+  } else { warn.style.display='none'; }
+  const paidBy = paidByRaw==='me' ? 'me' : +paidByRaw;
+  if(editSplitExpenseId){
+    const e=S.splitExpenses.find(x=>x.id===editSplitExpenseId);
+    e.desc=desc;e.amount=amt;e.date=date;e.paidBy=paidBy;e.participants=participants;
+    saveData();toast('Split expense updated');
+  } else {
+    S.splitExpenses.push({id:S.nSplitExpense++,desc,amount:amt,date,paidBy,participants});
+    saveData();toast('Split expense added');
+  }
+  closeModal('splitexpense');renderSplits();
+}
+function delSplitExpenseFromModal(){
+  if(!confirm('Delete this split expense?'))return;
+  S.splitExpenses=S.splitExpenses.filter(e=>e.id!==editSplitExpenseId);
+  closeModal('splitexpense');renderSplits();saveData();toast('Split expense removed');
+}
+function delSplitExpenseDirect(id){
+  if(!confirm('Delete this split expense?'))return;
+  S.splitExpenses=S.splitExpenses.filter(e=>e.id!==id);
+  renderSplits();saveData();toast('Split expense removed');
+}
+
+// ── Settle up ──
+function fillSplitSettleFriendSelect(){
+  const sel=document.getElementById('spls-friend');
+  sel.innerHTML = S.splitFriends.length
+    ? S.splitFriends.map(f=>`<option value="${f.id}">${escHtmlPwd(f.name)}</option>`).join('')
+    : `<option value="">Add a friend first</option>`;
+}
+function setSplitSettleDir(dir){
+  splitSettleDir=dir;
+  document.getElementById('spls-tb-ipaid').classList.toggle('active-exp',dir==='i_paid');
+  document.getElementById('spls-tb-theypaid').classList.toggle('active-inc',dir==='they_paid');
+}
+function saveSplitSettlement(){
+  const friendId=+document.getElementById('spls-friend').value;
+  const amt=parseFloat(document.getElementById('spls-amt').value)||0;
+  const date=document.getElementById('spls-date').value;
+  if(!friendId){toast('Add a friend first','red');return;}
+  if(!amt||amt<=0){toast('Enter a valid amount','red');return;}
+  S.splitSettlements.push({id:S.nSplitSettlement++,friendId,amount:amt,direction:splitSettleDir,date});
+  saveData();closeModal('splitsettle');renderSplits();toast('Settlement recorded');
+}
+function settleUpWithFriend(id){ openModal('splitsettle',id); }
+
+// ── Balance calculation ──
+function getSplitFriendBalance(friendId){
+  let bal=0;
+  S.splitExpenses.forEach(e=>{
+    const meShare=(e.participants||[]).find(p=>p.id==='me');
+    const friendShare=(e.participants||[]).find(p=>p.id===friendId);
+    if(e.paidBy==='me' && friendShare) bal += friendShare.share;
+    if(e.paidBy===friendId && meShare) bal -= meShare.share;
+  });
+  S.splitSettlements.filter(s=>s.friendId===friendId).forEach(s=>{
+    if(s.direction==='i_paid') bal += s.amount;
+    else bal -= s.amount;
+  });
+  return bal;
+}
+
+// ── Render ──
+function renderSplits(){
+  const owedEl=document.getElementById('spl-owed'), oweEl=document.getElementById('spl-owe'), netEl=document.getElementById('spl-net');
+  if(!owedEl)return;
+  let totalOwed=0, totalOwe=0;
+  S.splitFriends.forEach(f=>{
+    const b=getSplitFriendBalance(f.id);
+    if(b>0) totalOwed+=b; else totalOwe+=-b;
+  });
+  owedEl.textContent='₹'+fmt(totalOwed);
+  oweEl.textContent='₹'+fmt(totalOwe);
+  const net=totalOwed-totalOwe;
+  netEl.textContent=(net>=0?'+₹':'-₹')+fmt(Math.abs(net));
+
+  const grid=document.getElementById('spl-friends-grid');
+  const addFriendCard=`<div class="add-acc-card" onclick="openModal('splitfriend')"><div class="plus">+</div><div style="font-weight:700;font-size:14px">Add Friend</div><div style="font-size:12px;color:var(--muted-2)">Split expenses together</div></div>`;
+  if(!S.splitFriends.length){
+    grid.innerHTML = addFriendCard;
+  } else {
+    grid.innerHTML = S.splitFriends.map(f=>{
+      const bal=getSplitFriendBalance(f.id);
+      const owed=bal>0.005, owing=bal<-0.005;
+      const color=owed?'#16A34A':(owing?'#DC2626':'#8A969E');
+      const label=owed?'owes you':(owing?'you owe':'settled up');
+      return `<div class="acc-card" style="background:linear-gradient(135deg,${color}33,${color}11);backdrop-filter:blur(12px);">
+        <div class="acc-card-inner">
+          <div class="acc-top-row">
+            <div class="acc-logo-area"><div><div class="acc-bank-name">${escHtmlPwd(f.name)}</div><div class="acc-type-label">${label}</div></div></div>
+            <div class="acc-actions">
+              <button class="acc-action-btn" onclick="event.stopPropagation();openModal('splitfriend',${f.id})" title="Edit">✏</button>
+              <button class="acc-action-btn del" onclick="event.stopPropagation();delSplitFriendDirect(${f.id})" title="Delete">Del</button>
+            </div>
+          </div>
+          <div class="acc-mid">
+            <div class="acc-balance-label">${label}</div>
+            <div class="acc-balance" style="color:${color};">₹${fmt(Math.abs(bal))}</div>
+          </div>
+          <div class="acc-bottom" style="width:100%;">
+            <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();settleUpWithFriend(${f.id})" style="width:100%;justify-content:center;">Settle Up</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('') + addFriendCard;
+  }
+
+  const tb=document.getElementById('all-splits');
+  const sorted=[...S.splitExpenses].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  tb.innerHTML = sorted.map(e=>{
+    const payerName = e.paidBy==='me' ? 'Me' : (S.splitFriends.find(f=>f.id===e.paidBy)?.name || 'Unknown');
+    const meShare=(e.participants||[]).find(p=>p.id==='me');
+    const myShare = meShare ? meShare.share : 0;
+    return `<tr onclick="openModal('splitexpense',${e.id})" style="cursor:pointer;">
+      <td>${escHtmlPwd(e.desc)}</td>
+      <td>${escHtmlPwd(payerName)}</td>
+      <td class="num">₹${fmt(e.amount)}</td>
+      <td class="num">₹${fmt(myShare)}</td>
+      <td>${fmtDate(e.date)}</td>
+      <td class="td-del"><button class="acc-action-btn del" onclick="event.stopPropagation();delSplitExpenseDirect(${e.id})" title="Delete">Del</button></td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">No split expenses yet. Click "+ Add Expense" to get started.</td></tr>`;
+  const cs=document.getElementById('spl-exp-cs');
+  if(cs) cs.textContent = `${S.splitExpenses.length} expense${S.splitExpenses.length!==1?'s':''}`;
+}
 
 // ── CATEGORIES — full edit support ──
 let editCatId=null;
@@ -6959,6 +7480,13 @@ function escHtml(t){
   </div>
 </div>
 
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
 </body>
 </html>
 
