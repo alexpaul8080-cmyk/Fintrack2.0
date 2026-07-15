@@ -10,12 +10,6 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>FinTrack — Personal Finance</title>
-<link rel="manifest" href="manifest.json"/>
-<meta name="theme-color" content="#0a0a0a"/>
-<link rel="apple-touch-icon" href="icon-192.png"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="mobile-web-app-capable" content="yes"/>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%23111116%22/%3E%3Crect%20x%3D%221%22%20y%3D%221%22%20width%3D%2262%22%20height%3D%2262%22%20rx%3D%2213%22%20fill%3D%22none%22%20stroke%3D%22%232a2a32%22%20stroke-width%3D%221.5%22/%3E%3Ctext%20x%3D%2232%22%20y%3D%2245%22%20font-family%3D%22Arial%2C%20Helvetica%2C%20sans-serif%22%20font-size%3D%2234%22%20font-weight%3D%22700%22%20fill%3D%22%2316A34A%22%20text-anchor%3D%22middle%22%3E%E2%82%B9%3C/text%3E%3C/svg%3E">
 <!-- Google Identity Services + Drive API -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -209,6 +203,158 @@ body::after{
   border-top-color:rgba(255,255,255,0.28);
   box-shadow:0 2px 12px rgba(0,0,0,0.25),0 1px 0 rgba(255,255,255,0.12) inset;
 }
+/* ── Quick Menu dropdown ── */
+.qm-dropdown{position:relative;display:inline-block;}
+.qm-trigger{display:inline-flex;align-items:center;}
+.qm-panel{
+  display:none;position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);
+  min-width:200px;background:rgba(20,20,24,0.92);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);
+  border:1px solid rgba(255,255,255,0.14);border-top-color:rgba(255,255,255,0.22);
+  border-radius:14px;padding:6px;box-shadow:0 16px 40px rgba(0,0,0,0.5),0 1px 0 rgba(255,255,255,0.1) inset;
+  z-index:200;flex-direction:column;gap:2px;
+}
+.qm-dropdown.open .qm-panel{display:flex;}
+.qm-item{
+  display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  padding:9px 12px;border-radius:9px;border:none;background:transparent;
+  color:rgba(255,255,255,0.72);font-family:var(--font);font-size:13px;font-weight:600;
+  cursor:pointer;transition:background 0.12s,color 0.12s;letter-spacing:-0.01em;
+}
+.qm-item svg{width:15px;height:15px;flex-shrink:0;opacity:0.8;}
+.qm-item:hover{background:rgba(255,255,255,0.1);color:#fff;}
+body.light-mode .qm-panel{background:rgba(255,255,255,0.98);border-color:rgba(0,0,0,0.1);}
+body.light-mode .qm-item{color:#444;}
+body.light-mode .qm-item:hover{background:rgba(0,0,0,0.06);color:#000;}
+@media(max-width:900px){
+  .qm-dropdown{width:100%;}
+  .qm-panel{position:static;display:none;transform:none;width:100%;box-shadow:none;background:rgba(255,255,255,0.04);margin-top:2px;}
+  .qm-dropdown.open .qm-panel{display:flex;}
+  .qm-trigger{width:100%;justify-content:space-between;}
+}
+
+/* ── Project Planning: project picker dropdown ── */
+.pp-proj-dropdown{position:relative;}
+.pp-proj-btn{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;
+  padding:10px 14px;border-radius:10px;border:1.5px solid rgba(200,200,200,0.18);
+  background:rgba(255,255,255,0.06);color:var(--ink);font-size:13.5px;font-weight:600;
+  font-family:var(--font);cursor:pointer;transition:border-color 0.15s,background 0.15s;
+}
+.pp-proj-btn:hover{border-color:rgba(99,102,241,0.5);background:rgba(255,255,255,0.09);}
+.pp-proj-btn svg{transition:transform 0.15s;color:var(--muted);}
+.pp-proj-dropdown.open .pp-proj-btn svg{transform:rotate(180deg);}
+.pp-proj-panel{
+  display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:120;
+  background:rgba(20,20,24,0.94);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);
+  border:1px solid rgba(255,255,255,0.14);border-top-color:rgba(255,255,255,0.22);
+  border-radius:12px;padding:6px;box-shadow:0 16px 40px rgba(0,0,0,0.5),0 1px 0 rgba(255,255,255,0.1) inset;
+  max-height:280px;overflow-y:auto;
+}
+.pp-proj-dropdown.open .pp-proj-panel{display:block;}
+.pp-proj-opt{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;text-align:left;
+  padding:9px 10px;border-radius:8px;border:none;background:transparent;
+  color:rgba(255,255,255,0.75);font-family:var(--font);font-size:13px;font-weight:600;
+  cursor:pointer;transition:background 0.12s,color 0.12s;
+}
+.pp-proj-opt:hover{background:rgba(255,255,255,0.1);color:#fff;}
+.pp-proj-opt.sel{background:rgba(99,102,241,0.18);color:#fff;}
+.pp-proj-opt.sel::before{content:'✓';color:#818cf8;font-weight:700;margin-right:6px;}
+.pp-proj-opt-edit{
+  background:none;border:none;color:var(--muted-2);cursor:pointer;font-size:12px;padding:3px 6px;
+  border-radius:6px;flex-shrink:0;transition:all 0.15s;
+}
+.pp-proj-opt-edit:hover{color:var(--ink);background:rgba(255,255,255,0.1);}
+.pp-proj-divider{height:1px;background:rgba(255,255,255,0.1);margin:5px 2px;}
+.pp-proj-add{
+  display:flex;align-items:center;gap:8px;width:100%;text-align:left;
+  padding:9px 10px;border-radius:8px;border:none;background:transparent;
+  color:#818cf8;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:background 0.12s;
+}
+.pp-proj-add:hover{background:rgba(99,102,241,0.14);}
+body.light-mode .pp-proj-panel{background:rgba(255,255,255,0.98);border-color:rgba(0,0,0,0.1);}
+body.light-mode .pp-proj-opt{color:#444;}
+body.light-mode .pp-proj-opt:hover{background:rgba(0,0,0,0.06);color:#000;}
+body.light-mode .pp-proj-opt.sel{background:rgba(99,102,241,0.12);color:#000;}
+body.light-mode .pp-proj-divider{background:rgba(0,0,0,0.1);}
+
+/* ── CUSTOM DROPDOWN WIDGET — every dropdown in the app uses this,
+   matching the Project Planning picker exactly (glass panel, checkmark,
+   hover rows). The underlying <select> is kept in the DOM but hidden;
+   it remains the source of truth for all existing JS logic. ── */
+.cdd-native{
+  position:absolute !important;opacity:0 !important;pointer-events:none !important;
+  width:1px !important;height:1px !important;margin:0 !important;padding:0 !important;border:none !important;
+  background:transparent !important;overflow:hidden !important;z-index:-1 !important;
+}
+.cdd-wrap{position:relative;display:inline-block;width:100%;}
+.cdd-btn{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;
+  padding:10px 14px;border-radius:10px;border:1.5px solid rgba(200,200,200,0.18);
+  background:rgba(255,255,255,0.06);color:var(--ink);font-size:13.5px;font-weight:600;
+  font-family:var(--font);cursor:pointer;transition:border-color 0.15s,background 0.15s,box-shadow 0.15s;
+  text-align:left;
+}
+.cdd-btn-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
+.cdd-btn:hover{border-color:rgba(99,102,241,0.5);background:rgba(255,255,255,0.09);}
+.cdd-wrap.open .cdd-btn{border-color:rgba(99,102,241,0.65);background:rgba(255,255,255,0.1);box-shadow:0 0 0 3px rgba(99,102,241,0.18);}
+.cdd-btn.cdd-disabled,.cdd-btn:disabled{cursor:not-allowed;opacity:0.5;}
+.cdd-chev{width:13px;height:13px;flex-shrink:0;color:var(--muted);transition:transform 0.15s;}
+.cdd-wrap.open .cdd-chev{transform:rotate(180deg);color:#818cf8;}
+.cdd-panel{
+  display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:220;
+  min-width:100%;width:max-content;max-width:min(320px,90vw);
+  background:rgba(20,20,24,0.94);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);
+  border:1px solid rgba(255,255,255,0.14);border-top-color:rgba(255,255,255,0.22);
+  border-radius:12px;padding:6px;box-shadow:0 16px 40px rgba(0,0,0,0.5),0 1px 0 rgba(255,255,255,0.1) inset;
+  max-height:280px;overflow-y:auto;
+}
+.cdd-panel.cdd-panel-right{left:auto;right:0;}
+.cdd-panel.cdd-panel-up{top:auto;bottom:calc(100% + 6px);}
+.cdd-wrap.open .cdd-panel{display:block;}
+.cdd-opt{
+  display:block;width:100%;text-align:left;
+  padding:9px 10px 9px 30px;position:relative;border-radius:8px;border:none;background:transparent;
+  color:rgba(255,255,255,0.75);font-family:var(--font);font-size:13px;font-weight:600;
+  cursor:pointer;transition:background 0.12s,color 0.12s;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.cdd-opt:hover{background:rgba(255,255,255,0.1);color:#fff;}
+.cdd-opt.sel{background:rgba(99,102,241,0.18);color:#fff;}
+.cdd-opt.sel::before{content:'✓';position:absolute;left:10px;top:9px;color:#818cf8;font-weight:700;}
+.cdd-opt.disabled{color:rgba(255,255,255,0.3);cursor:not-allowed;}
+.cdd-opt.cdd-placeholder{color:rgba(255,255,255,0.4);font-style:italic;}
+.cdd-panel::-webkit-scrollbar{width:5px;}
+.cdd-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.14);border-radius:4px;}
+body.light-mode .cdd-btn{background:#f8f8f8;border-color:rgba(0,0,0,0.14);color:#1a1a1a;}
+body.light-mode .cdd-btn:hover{background:#f0f0f0;border-color:rgba(99,102,241,0.45);}
+body.light-mode .cdd-wrap.open .cdd-btn{background:#fff;border-color:rgba(99,102,241,0.55);}
+body.light-mode .cdd-panel{background:rgba(255,255,255,0.98);border-color:rgba(0,0,0,0.1);}
+body.light-mode .cdd-opt{color:#444;}
+body.light-mode .cdd-opt:hover{background:rgba(0,0,0,0.06);color:#000;}
+body.light-mode .cdd-opt.sel{background:rgba(99,102,241,0.12);color:#000;}
+body.light-mode .cdd-opt.disabled{color:rgba(0,0,0,0.28);}
+
+/* Compact pill variant — filter dropdowns (Transactions filters etc.) */
+.cdd-wrap.cdd-pill{width:auto;flex-shrink:0;}
+.cdd-wrap.cdd-pill .cdd-btn{
+  width:auto;padding:7px 14px 7px 16px;border-radius:999px;font-size:13px;font-weight:500;gap:8px;
+}
+.cdd-wrap.cdd-pill .cdd-btn-label{flex:none;}
+.cdd-wrap.cdd-pill .cdd-panel{width:max-content;min-width:140px;}
+/* Small variant — inline date pickers, budget/analytics selectors, bank-import per-row */
+.cdd-wrap.cdd-sm .cdd-btn{padding:8px 12px;border-radius:9px;font-size:12.5px;font-weight:600;}
+.cdd-wrap.cdd-sm .cdd-panel{font-size:12.5px;}
+.cdd-wrap.cdd-xs .cdd-btn{padding:6px 8px;border-radius:8px;font-size:12px;font-weight:500;}
+/* Indigo-tinted variant — financial cycle day pickers */
+.cdd-wrap.cdd-cycle .cdd-btn{
+  padding:9px 14px;border-radius:12px;
+  background:linear-gradient(160deg,rgba(99,102,241,0.14),rgba(99,102,241,0.04));
+  border-color:rgba(99,102,241,0.35);
+}
+.cdd-wrap.cdd-cycle .cdd-btn:hover{border-color:rgba(99,102,241,0.6);}
+.cdd-wrap.cdd-cycle .cdd-chev{color:#818cf8;}
+
 .signout-btn{
   display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;
   color:rgba(255,255,255,0.5);background:rgba(255,255,255,0.06);
@@ -1499,8 +1645,6 @@ body:not(.light-mode) .badge-goal { color: #d1d5db !important; }
 /* Light mode logo adjustments */
 body.light-mode .fsi-2,
 body.light-mode .fmh-2 { fill: #000000 !important; }
-body.light-mode .fsi-8,
-body.light-mode .fmh-8 { fill: #212121 !important; }
 
 /* ── PERFORMANCE OPTIMIZATIONS ── */
 * { -webkit-font-smoothing: antialiased; }
@@ -1543,37 +1687,20 @@ img, canvas { will-change: auto; }
 
     <!-- Logo -->
     <div class="signin-logo">
-      <svg id="ft-logo-si" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 267.36 56.52" style="height:54px;width:auto;">
+      <svg id="ft-logo-si" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 64" style="height:54px;width:auto;">
   <defs>
     <style>
-      .fsi-1 { fill: url(#fsi-grad2); }
-      .fsi-2 { font-family: MarkPro-Bold,'Mark Pro',Arial,sans-serif; font-size: 50px; font-weight: 700; isolation: isolate; fill: #ffffff; }
-      .fsi-3 { font-family: MarkPro-Bold,'Mark Pro',Arial,sans-serif; font-size: 50px; font-weight: 700; isolation: isolate; fill: #40a929; }
-      .fsi-5 { fill: url(#fsi-grad1); opacity: .6; }
-      .fsi-6 { fill: none; stroke: #40a929; stroke-miterlimit: 10; }
-      .fsi-7 { fill: #40a929; }
-      .fsi-8 { fill: rgba(30,30,30,0.75); }
+      .fsi-badge { fill: #111116; }
+      .fsi-badge-ring { fill: none; stroke: #2a2a32; stroke-width: 1.5; }
+      .fsi-rupee { font-family: -apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,sans-serif; font-size: 32px; font-weight: 700; fill: #16A34A; text-anchor: middle; }
+      .fsi-3 { font-family: -apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,sans-serif; font-size: 29px; font-weight: 700; letter-spacing: -0.5px; fill: #16A34A; }
+      .fsi-2 { font-family: -apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,sans-serif; font-size: 29px; font-weight: 700; letter-spacing: -0.5px; fill: #ffffff; }
     </style>
-    <linearGradient id="fsi-grad1" x1="17.03" y1="242.74" x2="22.23" y2="240.14" gradientTransform="translate(0 276.8) scale(1 -1)" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#212121"/>
-      <stop offset="1" stop-color="#40a929"/>
-    </linearGradient>
-    <linearGradient id="fsi-grad2" x1="37.91" y1="247.09" x2="42.91" y2="245.99" gradientTransform="translate(0 276.8) scale(1 -1)" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#000" stop-opacity=".5"/>
-      <stop offset="1" stop-color="#40a929"/>
-    </linearGradient>
   </defs>
-  <path class="fsi-7" d="M16.51,25.6l5.9,6.9-.7,12.1-5.2-6.1v-12.9Z"/>
-  <g style="isolation:isolate"><text class="fsi-3" transform="translate(69.31 44.7)"><tspan x="0" y="0">Fin</tspan></text></g>
-  <g style="isolation:isolate"><text class="fsi-2" transform="translate(135.91 44.1)"><tspan x="0" y="0">Track</tspan></text></g>
-  <path class="fsi-7" d="M37.81,15.7l5.1,6.5v22.6l-5.1-6.6V15.7Z"/>
-  <path class="fsi-5" d="M16.51,25.6l5.9,6.9-.7,12.1-5.2-6.1v-12.9Z"/>
-  <path class="fsi-8" d="M37.81,44.6h-16.1v-21.4l16.1-7.5v28.9Z"/>
-  <path class="fsi-8" d="M16.51,44.6H.41v-11.5l16.1-7.5v19Z"/>
-  <path class="fsi-8" d="M58.91,44.7h-16.1V13.4l16.1-7.6v38.9Z"/>
-  <path class="fsi-6" d="M.21,29.9L59.61,2.1"/>
-  <path class="fsi-7" d="M60.01,4.8l3-4.3-5.2-.5,2.2,4.8Z"/>
-  <path class="fsi-1" d="M37.81,15.7l5.1,6.5v22.6l-5.1-6.6V15.7Z"/>
+  <rect class="fsi-badge" width="64" height="64" rx="16"/>
+  <rect class="fsi-badge-ring" x="1.5" y="1.5" width="61" height="61" rx="14.5"/>
+  <text class="fsi-rupee" x="32" y="44.5">₹</text>
+  <text class="fsi-3" x="78" y="43">Fin<tspan class="fsi-2">Track</tspan></text>
 </svg>
     </div>
 
@@ -1608,37 +1735,20 @@ img, canvas { will-change: auto; }
   <div class="masthead-inner">
     <!-- Logo -->
     <div class="logo-mark" onclick="showPage('dashboard',null)" style="flex-shrink:0;">
-<svg id="ft-logo-mh" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 267.36 56.52" style="height:36px;width:auto;">
+<svg id="ft-logo-mh" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 64" style="height:36px;width:auto;">
   <defs>
     <style>
-      .fmh-1 { fill: url(#fmh-grad2); }
-      .fmh-2 { font-family: MarkPro-Bold,'Mark Pro',Arial,sans-serif; font-size: 50px; font-weight: 700; isolation: isolate; fill: #ffffff; }
-      .fmh-3 { font-family: MarkPro-Bold,'Mark Pro',Arial,sans-serif; font-size: 50px; font-weight: 700; isolation: isolate; fill: #40a929; }
-      .fmh-5 { fill: url(#fmh-grad1); opacity: .6; }
-      .fmh-6 { fill: none; stroke: #40a929; stroke-miterlimit: 10; }
-      .fmh-7 { fill: #40a929; }
-      .fmh-8 { fill: rgba(30,30,30,0.75); }
+      .fmh-badge { fill: #111116; }
+      .fmh-badge-ring { fill: none; stroke: #2a2a32; stroke-width: 1.5; }
+      .fmh-rupee { font-family: -apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,sans-serif; font-size: 32px; font-weight: 700; fill: #16A34A; text-anchor: middle; }
+      .fmh-3 { font-family: -apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,sans-serif; font-size: 29px; font-weight: 700; letter-spacing: -0.5px; fill: #16A34A; }
+      .fmh-2 { font-family: -apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,sans-serif; font-size: 29px; font-weight: 700; letter-spacing: -0.5px; fill: #ffffff; }
     </style>
-    <linearGradient id="fmh-grad1" x1="17.03" y1="242.74" x2="22.23" y2="240.14" gradientTransform="translate(0 276.8) scale(1 -1)" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#212121"/>
-      <stop offset="1" stop-color="#40a929"/>
-    </linearGradient>
-    <linearGradient id="fmh-grad2" x1="37.91" y1="247.09" x2="42.91" y2="245.99" gradientTransform="translate(0 276.8) scale(1 -1)" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#000" stop-opacity=".5"/>
-      <stop offset="1" stop-color="#40a929"/>
-    </linearGradient>
   </defs>
-  <path class="fmh-7" d="M16.51,25.6l5.9,6.9-.7,12.1-5.2-6.1v-12.9Z"/>
-  <g style="isolation:isolate"><text class="fmh-3" transform="translate(69.31 44.7)"><tspan x="0" y="0">Fin</tspan></text></g>
-  <g style="isolation:isolate"><text class="fmh-2" transform="translate(135.91 44.1)"><tspan x="0" y="0">Track</tspan></text></g>
-  <path class="fmh-7" d="M37.81,15.7l5.1,6.5v22.6l-5.1-6.6V15.7Z"/>
-  <path class="fmh-5" d="M16.51,25.6l5.9,6.9-.7,12.1-5.2-6.1v-12.9Z"/>
-  <path class="fmh-8" d="M37.81,44.6h-16.1v-21.4l16.1-7.5v28.9Z"/>
-  <path class="fmh-8" d="M16.51,44.6H.41v-11.5l16.1-7.5v19Z"/>
-  <path class="fmh-8" d="M58.91,44.7h-16.1V13.4l16.1-7.6v38.9Z"/>
-  <path class="fmh-6" d="M.21,29.9L59.61,2.1"/>
-  <path class="fmh-7" d="M60.01,4.8l3-4.3-5.2-.5,2.2,4.8Z"/>
-  <path class="fmh-1" d="M37.81,15.7l5.1,6.5v22.6l-5.1-6.6V15.7Z"/>
+  <rect class="fmh-badge" width="64" height="64" rx="16"/>
+  <rect class="fmh-badge-ring" x="1.5" y="1.5" width="61" height="61" rx="14.5"/>
+  <text class="fmh-rupee" x="32" y="44.5">₹</text>
+  <text class="fmh-3" x="78" y="43">Fin<tspan class="fmh-2">Track</tspan></text>
 </svg>
     </div>
     <!-- Hamburger (mobile only) -->
@@ -1654,9 +1764,24 @@ img, canvas { will-change: auto; }
       <button class="view-tab" onclick="showPage('goals',this);closeMobileNav()">Goals</button>
       <button class="view-tab" onclick="showPage('loans',this);closeMobileNav()">Loans</button>
       <button class="view-tab" onclick="showPage('categories',this);closeMobileNav()">Categories</button>
-      <button class="view-tab" onclick="showPage('passwords',this);closeMobileNav()">Passwords</button>
-      <button class="view-tab" onclick="showPage('splits',this);closeMobileNav()">Splits</button>
       <button class="view-tab" onclick="showPage('analytics',this);closeMobileNav()">Analytics</button>
+      <div class="qm-dropdown" id="qmDropdown">
+        <button class="view-tab qm-trigger" id="qmTrigger" onclick="toggleQuickMenu(event)">Quick Menu <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:11px;height:11px;margin-left:3px;vertical-align:-1px;"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="qm-panel" id="qmPanel">
+          <button class="qm-item" onclick="showPage('passwords',null,true);closeQuickMenu();closeMobileNav()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span>Passwords</span>
+          </button>
+          <button class="qm-item" onclick="showPage('splits',null,true);closeQuickMenu();closeMobileNav()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span>Splits</span>
+          </button>
+          <button class="qm-item" onclick="showPage('projectplan',null,true);closeQuickMenu();closeMobileNav()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <span>Project Planning</span>
+          </button>
+        </div>
+      </div>
       <button class="view-tab mobile-nav-signout" style="display:none;" onclick="signOut()">Sign out</button>
     </div>
     <!-- User pill + theme toggle + sign out — top right -->
@@ -1870,10 +1995,10 @@ img, canvas { will-change: auto; }
         <button type="button" class="dr-tab active" data-bgt-mode="month" onclick="setBgtDateMode('month')">By Month</button>
         <button type="button" class="dr-tab" data-bgt-mode="custom" onclick="setBgtDateMode('custom')">Custom Range</button>
       </div>
-      <span id="bgt-month-controls" style="display:inline-flex;align-items:center;gap:8px;">
-        <select id="bgt-view-month" onchange="onBgtViewDateChange()" style="padding:8px 12px;border-radius:9px;border:1.5px solid rgba(200,200,200,0.18);background:rgba(255,255,255,0.06);color:var(--ink);font-size:12.5px;font-family:var(--font);font-weight:600;cursor:pointer;"></select>
-        <select id="bgt-view-year" onchange="onBgtViewDateChange()" style="padding:8px 12px;border-radius:9px;border:1.5px solid rgba(200,200,200,0.18);background:rgba(255,255,255,0.06);color:var(--ink);font-size:12.5px;font-family:var(--font);font-weight:600;cursor:pointer;"></select>
-        <button class="btn btn-ghost btn-sm" onclick="jumpBgtViewToday()">Today</button>
+      <span id="bgt-month-controls" style="display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <select id="bgt-view-month" onchange="onBgtViewDateChange()" class="select-glass-sm" style="flex-shrink:0;"></select>
+        <select id="bgt-view-year" onchange="onBgtViewDateChange()" class="select-glass-sm" style="flex-shrink:0;"></select>
+        <button class="btn btn-ghost" onclick="jumpBgtViewToday()" style="flex-shrink:0;white-space:nowrap;padding:9px 18px;font-size:13px;">Today</button>
       </span>
       <span id="bgt-custom-controls" style="display:none;align-items:center;gap:0;">
         <div class="dr-chip" onclick="this.querySelector('input').showPicker?.()"><span class="dr-chip-label">From</span><div class="dr-chip-row"><span class="dr-chip-value" id="bgt-from-disp">Select date</span><svg class="dr-chip-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><input type="date" id="bgt-from" onchange="onBgtViewDateChange()"></div></div>
@@ -1888,7 +2013,7 @@ img, canvas { will-change: auto; }
     <div class="card glass">
       <div class="card-head">
         <h3>Budget Trend</h3>
-        <select id="bgt-trend-select" onchange="renderBgtTrendChart()" style="padding:6px 12px;border-radius:9px;border:1.5px solid rgba(200,200,200,0.18);background:rgba(255,255,255,0.06);color:var(--ink);font-size:12.5px;font-family:var(--font);font-weight:600;cursor:pointer;max-width:60%;"></select>
+        <select id="bgt-trend-select" onchange="renderBgtTrendChart()" class="select-glass-sm" style="max-width:60%;"></select>
       </div>
       <div class="chart-wrap short"><canvas id="ch-bgt-trend"></canvas></div>
     </div>
@@ -1957,6 +2082,50 @@ img, canvas { will-change: auto; }
 </main>
 </div>
 
+<!-- ── PROJECT PLANNING ── -->
+<div class="page" id="page-projectplan">
+<main>
+  <div class="section-head" style="flex-wrap:wrap;gap:10px;">
+    <div><h2>Project <em>Planning</em></h2><p class="meta">Estimate a personal project's cost, then track what it actually cost you</p></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="openModal('projectgroup')">+ New Project</button>
+      <button class="btn btn-primary" onclick="addProjectItemGuarded()" id="pp-add-item-btn">+ Add Item</button>
+    </div>
+  </div>
+
+  <div class="fg" style="max-width:340px;margin-bottom:20px;">
+    <label>Project</label>
+    <div class="pp-proj-dropdown" id="ppProjDropdown">
+      <button type="button" id="pp-proj-btn" onclick="toggleProjectDropdown()" class="pp-proj-btn">
+        <span id="pp-proj-btn-label">No projects yet</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px;flex-shrink:0;"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="pp-proj-panel" id="pp-proj-panel"></div>
+    </div>
+  </div>
+
+  <div class="kpi-grid privacy-sensitive" style="grid-template-columns:repeat(3,1fr);">
+    <div class="kpi glass glass-hover"><div class="kpi-stripe" style="background:linear-gradient(90deg,#6366f1,#818cf8)"></div><div class="kpi-label">Projected Total</div><div class="kpi-value" id="pp-projected-total">₹0</div><div class="kpi-sub">Sum of approx amounts</div></div>
+    <div class="kpi glass glass-hover"><div class="kpi-stripe" style="background:linear-gradient(90deg,#F0AB00,#ffd76a)"></div><div class="kpi-label">Actual Total</div><div class="kpi-value" id="pp-actual-total">₹0</div><div class="kpi-sub">Sum of actual amounts</div></div>
+    <div class="kpi glass glass-hover"><div class="kpi-stripe" id="pp-diff-stripe" style="background:linear-gradient(90deg,#DC2626,#ef4444)"></div><div class="kpi-label">Difference</div><div class="kpi-value" id="pp-diff-total">₹0</div><div class="kpi-sub" id="pp-diff-sub">Actual vs projected</div></div>
+  </div>
+
+  <div class="card glass table-card">
+    <div class="card-head"><h3>Line Items</h3><span class="meta" id="pp-item-cs">—</span></div>
+    <div class="tscroll"><table><thead><tr><th>Item / Category</th><th class="num">Projected Amount</th><th class="num">Actual Amount</th><th class="num">Difference</th><th class="td-del"></th></tr></thead>
+      <tbody id="pp-items-body" class="privacy-sensitive"></tbody>
+      <tfoot><tr style="font-weight:700;border-top:1.5px solid rgba(200,200,200,0.18);">
+        <td>Total</td>
+        <td class="num" id="pp-foot-projected">₹0</td>
+        <td class="num" id="pp-foot-actual">₹0</td>
+        <td class="num" id="pp-foot-diff">₹0</td>
+        <td></td>
+      </tr></tfoot>
+    </table></div>
+  </div>
+</main>
+</div>
+
 <!-- ── PASSWORDS ── -->
 <div class="page" id="page-passwords">
 <main>
@@ -1996,9 +2165,9 @@ img, canvas { will-change: auto; }
           <button type="button" class="dr-tab active" data-mst-mode="month" onclick="setMstDateMode('month')">By Month</button>
           <button type="button" class="dr-tab" data-mst-mode="custom" onclick="setMstDateMode('custom')">Custom Range</button>
         </div>
-        <span id="mst-month-controls" style="display:inline-flex;align-items:center;gap:8px;">
-          <select id="mst-month" onchange="onMstViewDateChange()" style="padding:8px 12px;border-radius:9px;border:1.5px solid rgba(200,200,200,0.18);background:rgba(255,255,255,0.06);color:var(--ink);font-size:12.5px;font-family:var(--font);font-weight:600;cursor:pointer;"></select>
-          <select id="mst-year" onchange="onMstViewDateChange()" style="padding:8px 12px;border-radius:9px;border:1.5px solid rgba(200,200,200,0.18);background:rgba(255,255,255,0.06);color:var(--ink);font-size:12.5px;font-family:var(--font);font-weight:600;cursor:pointer;"></select>
+        <span id="mst-month-controls" style="display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <select id="mst-month" onchange="onMstViewDateChange()" class="select-glass-sm" style="flex-shrink:0;"></select>
+          <select id="mst-year" onchange="onMstViewDateChange()" class="select-glass-sm" style="flex-shrink:0;"></select>
         </span>
         <span id="mst-custom-controls" style="display:none;align-items:center;gap:0;">
           <div class="dr-chip" onclick="this.querySelector('input').showPicker?.()"><span class="dr-chip-label">From</span><div class="dr-chip-row"><span class="dr-chip-value" id="mst-from-disp">Select date</span><svg class="dr-chip-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><input type="date" id="mst-from" onchange="onMstViewDateChange()"></div></div>
@@ -2158,9 +2327,9 @@ img, canvas { will-change: auto; }
           <button type="button" class="dr-tab active" data-mbl-mode="month" onclick="setMblDateMode('month')">By Month</button>
           <button type="button" class="dr-tab" data-mbl-mode="custom" onclick="setMblDateMode('custom')">Custom Range</button>
         </div>
-        <span id="mbl-month-controls" style="display:inline-flex;align-items:center;gap:8px;">
-          <select id="mbl-month" onchange="onMblViewDateChange()" style="padding:8px 12px;border-radius:9px;border:1.5px solid rgba(200,200,200,0.18);background:rgba(255,255,255,0.06);color:var(--ink);font-size:12.5px;font-family:var(--font);font-weight:600;cursor:pointer;"></select>
-          <select id="mbl-year" onchange="onMblViewDateChange()" style="padding:8px 12px;border-radius:9px;border:1.5px solid rgba(200,200,200,0.18);background:rgba(255,255,255,0.06);color:var(--ink);font-size:12.5px;font-family:var(--font);font-weight:600;cursor:pointer;"></select>
+        <span id="mbl-month-controls" style="display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <select id="mbl-month" onchange="onMblViewDateChange()" class="select-glass-sm" style="flex-shrink:0;"></select>
+          <select id="mbl-year" onchange="onMblViewDateChange()" class="select-glass-sm" style="flex-shrink:0;"></select>
         </span>
         <span id="mbl-custom-controls" style="display:none;align-items:center;gap:0;">
           <div class="dr-chip" onclick="this.querySelector('input').showPicker?.()"><span class="dr-chip-label">From</span><div class="dr-chip-row"><span class="dr-chip-value" id="mbl-from-disp">Select date</span><svg class="dr-chip-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><input type="date" id="mbl-from" onchange="onMblViewDateChange()"></div></div>
@@ -2183,7 +2352,7 @@ img, canvas { will-change: auto; }
         <span class="meta">Pick a view and date range — every chart possible, one dropdown away</span>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-        <select id="cg-groupby" onchange="renderCustomGraph()" style="padding:8px 12px;border-radius:9px;border:1.5px solid rgba(200,200,200,0.18);background:rgba(255,255,255,0.06);color:var(--ink);font-size:12.5px;font-family:var(--font);font-weight:600;cursor:pointer;">
+        <select id="cg-groupby" onchange="renderCustomGraph()" class="select-glass-sm">
           <option value="time">Over Time (Income vs Expense)</option>
           <option value="category">By Category</option>
           <option value="account">By Account</option>
@@ -2191,7 +2360,7 @@ img, canvas { will-change: auto; }
           <option value="transaction">By Transaction (Top 20)</option>
         </select>
         <span id="cg-granularity-wrap" style="display:inline-block;">
-          <select id="cg-granularity" onchange="renderCustomGraph()" style="padding:8px 12px;border-radius:9px;border:1.5px solid rgba(200,200,200,0.18);background:rgba(255,255,255,0.06);color:var(--ink);font-size:12.5px;font-family:var(--font);font-weight:600;cursor:pointer;">
+          <select id="cg-granularity" onchange="renderCustomGraph()" class="select-glass-sm">
             <option value="day">Daily</option>
             <option value="month" selected>Monthly</option>
             <option value="year">Yearly</option>
@@ -2443,12 +2612,37 @@ img, canvas { will-change: auto; }
 <!-- Split Friend -->
 <div class="modal-bg" id="m-splitfriend">
   <div class="modal">
-    <div class="modal-hdr"><span class="modal-title" id="m-splf-title">Add Friend</span><button class="modal-close" onclick="closeModal('splitfriend')">✕</button></div>
-    <div class="fg"><label>Friend's Name</label><input type="text" id="splf-name" placeholder="e.g. Rahul, Priya"></div>
-    <div class="form-actions">
-      <button class="btn btn-danger btn-sm" id="splf-del-btn" style="display:none;margin-right:auto" onclick="delSplitFriendFromModal()">Delete</button>
-      <button class="btn btn-ghost" onclick="closeModal('splitfriend')">Cancel</button>
-      <button class="btn btn-primary" id="splf-save-btn" onclick="saveSplitFriend()">Add Friend</button>
+    <div class="modal-hdr"><span class="modal-title" id="m-splf-title">Add Friends</span><button class="modal-close" onclick="closeModal('splitfriend')">✕</button></div>
+
+    <!-- ── EDIT MODE (single) ── -->
+    <div id="splf-edit-mode" style="display:none;">
+      <div class="fg"><label>Friend's Name</label><input type="text" id="splf-name" placeholder="e.g. Rahul, Priya"></div>
+      <div class="form-actions">
+        <button class="btn btn-danger btn-sm" id="splf-del-btn" style="display:none;margin-right:auto" onclick="delSplitFriendFromModal()">Delete</button>
+        <button class="btn btn-ghost" onclick="closeModal('splitfriend')">Cancel</button>
+        <button class="btn btn-primary" id="splf-save-btn" onclick="saveSplitFriend()">Save Changes</button>
+      </div>
+    </div>
+
+    <!-- ── ADD MODE (bulk) ── -->
+    <div id="splf-add-mode">
+      <div style="margin-bottom:8px;">
+        <label style="display:block;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Friends' Names</label>
+        <div id="splf-bulk-rows" style="display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto;padding-right:2px;"></div>
+      </div>
+      <button onclick="addSplitFriendBulkRow()" style="width:100%;padding:8px;border-radius:10px;border:1.5px dashed rgba(200,200,200,0.25);background:transparent;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:var(--font);margin-bottom:14px;"
+        onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'"
+        onmouseout="this.style.borderColor='rgba(200,200,200,0.25)';this.style.color='var(--muted)'">
+        + Add another friend
+      </button>
+      <div style="padding:10px 14px;border-radius:10px;background:rgba(200,200,200,0.05);border:1px solid rgba(200,200,200,0.12);font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6;">
+        Tip: Press <strong style="color:var(--ink)">Tab</strong> or <strong style="color:var(--ink)">Enter</strong> in any row to jump to the next. Add as many friends as you need in one go.
+      </div>
+      <div class="form-actions">
+        <span id="splf-bulk-count" style="font-size:12px;color:var(--muted);margin-right:auto;font-weight:600;align-self:center;"></span>
+        <button class="btn btn-ghost" onclick="closeModal('splitfriend')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveSplitFriendsBulk()">Add All Friends</button>
+      </div>
     </div>
   </div>
 </div>
@@ -2496,6 +2690,65 @@ img, canvas { will-change: auto; }
     <div class="form-actions">
       <button class="btn btn-ghost" onclick="closeModal('splitsettle')">Cancel</button>
       <button class="btn btn-primary" onclick="saveSplitSettlement()">Record Settlement</button>
+    </div>
+  </div>
+</div>
+<!-- Project (group) -->
+<div class="modal-bg" id="m-projectgroup">
+  <div class="modal">
+    <div class="modal-hdr"><span class="modal-title" id="m-ppg-title">New Project</span><button class="modal-close" onclick="closeModal('projectgroup')">✕</button></div>
+    <div class="fg"><label>Project Name</label><input type="text" id="ppg-name" placeholder="e.g. Home Aquarium, Bike Restoration"></div>
+    <div class="form-actions">
+      <button class="btn btn-danger btn-sm" id="ppg-del-btn" style="display:none;margin-right:auto" onclick="delProjectGroupFromModal()">Delete Project</button>
+      <button class="btn btn-ghost" onclick="closeModal('projectgroup')">Cancel</button>
+      <button class="btn btn-primary" id="ppg-save-btn" onclick="saveProjectGroup()">Create Project</button>
+    </div>
+  </div>
+</div>
+<!-- Project Item -->
+<div class="modal-bg" id="m-projectitem">
+  <div class="modal" style="width:640px;">
+    <div class="modal-hdr"><span class="modal-title" id="m-ppi-title">Add Items</span><button class="modal-close" onclick="closeModal('projectitem')">✕</button></div>
+
+    <!-- ── EDIT MODE (single) ── -->
+    <div id="ppi-edit-mode" style="display:none;">
+      <div class="fg"><label>Item Name / Category</label><input type="text" id="ppi-name" placeholder="e.g. Aquarium tank, Filter, Lighting"></div>
+      <div class="fg-row">
+        <div class="fg"><label>Projected Amount (₹)</label><input type="number" id="ppi-projected" placeholder="0" min="0" step="0.01" oninput="onProjItemAmountsChange()"></div>
+        <div class="fg"><label>Actual Amount (₹) <span style="font-weight:400;color:var(--muted);">(optional)</span></label><input type="number" id="ppi-actual" placeholder="0" min="0" step="0.01" oninput="onProjItemAmountsChange()"></div>
+      </div>
+      <div style="font-size:12.5px;color:var(--muted);margin-bottom:4px;">Difference: <strong id="ppi-diff-preview" style="color:var(--ink);">₹0</strong></div>
+      <div class="form-actions">
+        <button class="btn btn-danger btn-sm" id="ppi-del-btn" style="display:none;margin-right:auto" onclick="delProjectItemFromModal()">Delete</button>
+        <button class="btn btn-ghost" onclick="closeModal('projectitem')">Cancel</button>
+        <button class="btn btn-primary" id="ppi-save-btn" onclick="saveProjectItem()">Save Changes</button>
+      </div>
+    </div>
+
+    <!-- ── ADD MODE (bulk) ── -->
+    <div id="ppi-add-mode">
+      <div style="margin-bottom:8px;">
+        <div style="display:grid;grid-template-columns:1fr 120px 120px 28px;gap:8px;padding:0 2px 6px;">
+          <label style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);">Item / Category</label>
+          <label style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);">Projected ₹</label>
+          <label style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);">Actual ₹</label>
+          <span></span>
+        </div>
+        <div id="ppi-bulk-rows" style="display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto;padding-right:2px;"></div>
+      </div>
+      <button onclick="addProjItemBulkRow()" style="width:100%;padding:8px;border-radius:10px;border:1.5px dashed rgba(200,200,200,0.25);background:transparent;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:var(--font);margin-bottom:14px;"
+        onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'"
+        onmouseout="this.style.borderColor='rgba(200,200,200,0.25)';this.style.color='var(--muted)'">
+        + Add another item
+      </button>
+      <div style="padding:10px 14px;border-radius:10px;background:rgba(200,200,200,0.05);border:1px solid rgba(200,200,200,0.12);font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6;">
+        Tip: Press <strong style="color:var(--ink)">Tab</strong> or <strong style="color:var(--ink)">Enter</strong> in the name field to jump ahead. Actual amount is optional — leave it blank until you've spent the money.
+      </div>
+      <div class="form-actions">
+        <span id="ppi-bulk-count" style="font-size:12px;color:var(--muted);margin-right:auto;font-weight:600;align-self:center;"></span>
+        <button class="btn btn-ghost" onclick="closeModal('projectitem')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveProjItemsBulk()">Add All Items</button>
+      </div>
     </div>
   </div>
 </div>
@@ -2896,6 +3149,7 @@ function refreshAllViews(){
   renderLoans?.();
   renderPasswords?.();
   renderSplits?.();
+  renderProjects?.();
 }
 
 function signOut(){
@@ -2908,8 +3162,10 @@ function signOut(){
   driveAccessToken = null; driveFileId = null;
   S.accounts=[];S.transactions=[];S.categories=[];S.budgets=[];S.goals=[];S.loans=[];S.passwords=[];
   S.splitFriends=[];S.splitExpenses=[];S.splitSettlements=[];
+  S.projects=[];S.projectItems=[];
   S.nAcc=1;S.nTxn=1;S.nCat=1;S.nBgt=1;S.nGoal=1;S.nLoan=1;S.nPwd=1;
   S.nSplitFriend=1;S.nSplitExpense=1;S.nSplitSettlement=1;
+  S.nProject=1;S.nProjectItem=1;
   document.getElementById('app-shell').style.display = 'none';
   document.getElementById('pg-signin').style.display  = 'flex';
   document.getElementById('si-name').value = '';
@@ -3011,6 +3267,8 @@ function applyData(data){
   if(data.splitFriends)     S.splitFriends     = data.splitFriends;
   if(data.splitExpenses)    S.splitExpenses    = data.splitExpenses;
   if(data.splitSettlements) S.splitSettlements = data.splitSettlements;
+  if(data.projects)         S.projects         = data.projects;
+  if(data.projectItems)     S.projectItems     = data.projectItems;
   if(data.nAcc)         S.nAcc         = data.nAcc;
   if(data.nTxn)         S.nTxn         = data.nTxn;
   if(data.nBgt)         S.nBgt         = data.nBgt;
@@ -3021,6 +3279,8 @@ function applyData(data){
   if(data.nSplitFriend)     S.nSplitFriend     = data.nSplitFriend;
   if(data.nSplitExpense)    S.nSplitExpense    = data.nSplitExpense;
   if(data.nSplitSettlement) S.nSplitSettlement = data.nSplitSettlement;
+  if(data.nProject)         S.nProject         = data.nProject;
+  if(data.nProjectItem)     S.nProjectItem     = data.nProjectItem;
   if(data.settings)     S.settings     = {cycleStartDay:1, ...data.settings};
   if(data.dashOrder)      S.dashOrder      = data.dashOrder;
   if(data.analyticsOrder) S.analyticsOrder = data.analyticsOrder;
@@ -3038,6 +3298,8 @@ function applyData(data){
   S.splitExpenses.forEach(e=>{ e.id=+e.id; e.amount=+e.amount; e.paidBy=(e.paidBy==='me')?'me':+e.paidBy;
     (e.participants||[]).forEach(p=>{ p.id=(p.id==='me')?'me':+p.id; p.share=+p.share; }); });
   S.splitSettlements.forEach(s=>{ s.id=+s.id; s.amount=+s.amount; s.friendId=+s.friendId; });
+  S.projects.forEach(p=>{ p.id=+p.id; });
+  S.projectItems.forEach(i=>{ i.id=+i.id; i.projectId=+i.projectId; i.projected=+(i.projected||0); i.actual=+(i.actual||0); });
 }
 
 // ── Save to Drive (debounced 1s) ──
@@ -3059,10 +3321,12 @@ async function _doDriveSave(){
       categories:S.categories, settings:S.settings,
       passwords:S.passwords,
       splitFriends:S.splitFriends, splitExpenses:S.splitExpenses, splitSettlements:S.splitSettlements,
+      projects:S.projects, projectItems:S.projectItems,
       dashOrder:S.dashOrder, analyticsOrder:S.analyticsOrder,
       nAcc:S.nAcc, nTxn:S.nTxn, nCat:S.nCat,
       nBgt:S.nBgt, nGoal:S.nGoal, nLoan:S.nLoan, nPwd:S.nPwd,
       nSplitFriend:S.nSplitFriend, nSplitExpense:S.nSplitExpense, nSplitSettlement:S.nSplitSettlement,
+      nProject:S.nProject, nProjectItem:S.nProjectItem,
     });
     const boundary = 'ft_boundary_2024';
     const body = `--${boundary}
@@ -3096,10 +3360,12 @@ function saveLocalBackup(){
       categories:S.categories, settings:S.settings,
       passwords:S.passwords,
       splitFriends:S.splitFriends, splitExpenses:S.splitExpenses, splitSettlements:S.splitSettlements,
+      projects:S.projects, projectItems:S.projectItems,
       dashOrder:S.dashOrder, analyticsOrder:S.analyticsOrder,
       nAcc:S.nAcc, nTxn:S.nTxn, nCat:S.nCat,
       nBgt:S.nBgt, nGoal:S.nGoal, nLoan:S.nLoan, nPwd:S.nPwd,
       nSplitFriend:S.nSplitFriend, nSplitExpense:S.nSplitExpense, nSplitSettlement:S.nSplitSettlement,
+      nProject:S.nProject, nProjectItem:S.nProjectItem,
       savedAt: new Date().toISOString(),
     }));
   } catch(e){}
@@ -3149,8 +3415,10 @@ function clearData(){
   S.accounts=[];S.transactions=[];S.categories=[];
   S.budgets=[];S.goals=[];S.loans=[];S.passwords=[];
   S.splitFriends=[];S.splitExpenses=[];S.splitSettlements=[];
+  S.projects=[];S.projectItems=[];
   S.nAcc=1;S.nTxn=1;S.nCat=1;S.nBgt=1;S.nGoal=1;S.nLoan=1;S.nPwd=1;
   S.nSplitFriend=1;S.nSplitExpense=1;S.nSplitSettlement=1;
+  S.nProject=1;S.nProjectItem=1;
   // Clear localStorage
   try{ localStorage.removeItem(localKey()); } catch(e){}
   // Clear Drive — write empty snapshot
@@ -3195,6 +3463,7 @@ function executeWipe(){
     renderCats();
     renderPasswords();
     renderSplits();
+    renderProjects();
     refreshAnalytics();
     toast('All data wiped. Starting fresh.');
   }, 200);
@@ -3247,31 +3516,40 @@ const S={
   budgets:[],goals:[],loans:[],
   passwords:[],
   splitFriends:[],splitExpenses:[],splitSettlements:[],
+  projects:[],projectItems:[],
   nAcc:1,nTxn:1,nCat:1,nBgt:1,nGoal:1,nLoan:1,nPwd:1,
   nSplitFriend:1,nSplitExpense:1,nSplitSettlement:1,
+  nProject:1,nProjectItem:1,
   settings:{cycleStartDay:1},
 };
 let TT='expense',CT='expense';
 let selIcon='',selAccTheme=0,selCatClr='rgba(255,255,255,0.55)';
 let editTxnId=null,editAccId=null,editBgtId=null,editGoalId=null,editLoanId=null,editPwdId=null;
 let editSplitFriendId=null,editSplitExpenseId=null,splitSettleDir='i_paid';
+let editProjectGroupId=null,editProjectItemId=null,currentProjectId=null;
 const CH={};
 
 // ── NAV ──
-function showPage(name,el){
+function showPage(name,el,isQuickMenuItem){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.view-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
-  if(el)el.classList.add('active');
-  else document.querySelectorAll('.view-tab').forEach(t=>{if(t.getAttribute('onclick')?.includes("'"+name+"'"))t.classList.add('active');});
-  const fn={dashboard:refreshDash,analytics:refreshAnalytics,transactions:renderTxns,accounts:renderAccounts,categories:renderCats,budgets:renderBudgets,goals:renderGoals,loans:renderLoans,passwords:renderPasswords,splits:renderSplits};
+  const QM_PAGES=['passwords','splits','projectplan'];
+  if(isQuickMenuItem || QM_PAGES.includes(name)){
+    document.getElementById('qmTrigger')?.classList.add('active');
+  } else if(el){
+    el.classList.add('active');
+  } else {
+    document.querySelectorAll('.view-tab').forEach(t=>{if(t.getAttribute('onclick')?.includes("'"+name+"'"))t.classList.add('active');});
+  }
+  const fn={dashboard:refreshDash,analytics:refreshAnalytics,transactions:renderTxns,accounts:renderAccounts,categories:renderCats,budgets:renderBudgets,goals:renderGoals,loans:renderLoans,passwords:renderPasswords,splits:renderSplits,projectplan:renderProjects};
   fn[name]?.();
 }
 
 // ── MODALS ──
 function openModal(name,id){
   // Reset editing state
-  editTxnId=null;editAccId=null;editBgtId=null;editGoalId=null;editLoanId=null;editCatId=null;editPwdId=null;editSplitFriendId=null;editSplitExpenseId=null;
+  editTxnId=null;editAccId=null;editBgtId=null;editGoalId=null;editLoanId=null;editCatId=null;editPwdId=null;editSplitFriendId=null;editSplitExpenseId=null;editProjectGroupId=null;editProjectItemId=null;
   if(name==='category'){openCatModal(id);return;}
 
   if(name==='txn'){
@@ -3286,7 +3564,7 @@ function openModal(name,id){
       document.getElementById('t-amt').value=t.amount;
       document.getElementById('t-date').value=t.date;
       document.getElementById('t-desc').value=t.desc;
-      setTimeout(()=>{document.getElementById('t-acc').value=t.accId;document.getElementById('t-cat').value=t.catId;},10);
+      setTimeout(()=>{document.getElementById('t-acc').value=t.accId;document.getElementById('t-cat').value=t.catId;refreshSelectWidget('t-acc');refreshSelectWidget('t-cat');},10);
     } else {
       document.getElementById('t-date').value=new Date().toISOString().split('T')[0];
       document.getElementById('t-amt').value='';document.getElementById('t-desc').value='';
@@ -3303,6 +3581,7 @@ function openModal(name,id){
       const a=S.accounts.find(x=>x.id===id);
       document.getElementById('a-name').value=a.name;
       document.getElementById('a-type').value=a.type;
+      refreshSelectWidget('a-type');
       document.getElementById('a-bal').value=a.balance;
       selIcon=a.icon; selAccTheme=a.theme||0;
       selAccColor=a.cardColor||ACC_PRESETS[0];
@@ -3396,18 +3675,7 @@ function openModal(name,id){
       ['p-site','p-user','p-pass','p-notes'].forEach(x=>document.getElementById(x).value='');
     }
   }
-  if(name==='splitfriend'){
-    editSplitFriendId=id||null;
-    document.getElementById('splf-del-btn').style.display=id?'inline-flex':'none';
-    document.getElementById('m-splf-title').textContent=id?'Edit Friend':'Add Friend';
-    document.getElementById('splf-save-btn').textContent=id?'Save Changes':'Add Friend';
-    if(id){
-      const f=S.splitFriends.find(x=>x.id===id);
-      document.getElementById('splf-name').value=f.name;
-    } else {
-      document.getElementById('splf-name').value='';
-    }
-  }
+  if(name==='splitfriend'){openSplitFriendModal(id);return;}
   if(name==='splitexpense'){
     editSplitExpenseId=id||null;
     document.getElementById('sple-del-btn').style.display=id?'inline-flex':'none';
@@ -3420,12 +3688,14 @@ function openModal(name,id){
       document.getElementById('sple-amt').value=e.amount;
       document.getElementById('sple-date').value=e.date;
       document.getElementById('sple-paidby').value=e.paidBy;
+      refreshSelectWidget('sple-paidby');
       buildSplitParticipantsUI(e.participants);
     } else {
       document.getElementById('sple-desc').value='';
       document.getElementById('sple-amt').value='';
       document.getElementById('sple-date').value=new Date().toISOString().split('T')[0];
       document.getElementById('sple-paidby').value='me';
+      refreshSelectWidget('sple-paidby');
       buildSplitParticipantsUI(null);
     }
   }
@@ -3434,8 +3704,21 @@ function openModal(name,id){
     setSplitSettleDir('i_paid');
     document.getElementById('spls-amt').value='';
     document.getElementById('spls-date').value=new Date().toISOString().split('T')[0];
-    if(id) document.getElementById('spls-friend').value=id;
+    if(id){ document.getElementById('spls-friend').value=id; refreshSelectWidget('spls-friend'); }
   }
+  if(name==='projectgroup'){
+    editProjectGroupId=id||null;
+    document.getElementById('ppg-del-btn').style.display=id?'inline-flex':'none';
+    document.getElementById('m-ppg-title').textContent=id?'Rename Project':'New Project';
+    document.getElementById('ppg-save-btn').textContent=id?'Save Changes':'Create Project';
+    if(id){
+      const p=S.projects.find(x=>x.id===id);
+      document.getElementById('ppg-name').value=p.name;
+    } else {
+      document.getElementById('ppg-name').value='';
+    }
+  }
+  if(name==='projectitem'){openProjectItemModal(id);return;}
   document.getElementById('m-'+name).classList.add('open');
 }
 function closeModal(n){document.getElementById('m-'+n).classList.remove('open');const p=document.getElementById('b-cat-panel');if(p)p.style.display='none';}
@@ -3672,6 +3955,92 @@ function exportPasswordsExcel(){
 // ══════════════════════════════════════
 
 // ── Friends ──
+let splfBulkRowCount=0;
+function openSplitFriendModal(id){
+  editSplitFriendId = id || null;
+  if(id){
+    document.getElementById('splf-edit-mode').style.display='block';
+    document.getElementById('splf-add-mode').style.display='none';
+    document.getElementById('m-splf-title').textContent='Edit Friend';
+    document.getElementById('splf-del-btn').style.display='inline-flex';
+    const f=S.splitFriends.find(x=>x.id===id);
+    document.getElementById('splf-name').value=f.name;
+  } else {
+    document.getElementById('splf-edit-mode').style.display='none';
+    document.getElementById('splf-add-mode').style.display='block';
+    document.getElementById('m-splf-title').textContent='Add Friends';
+    const rowsEl=document.getElementById('splf-bulk-rows');
+    rowsEl.innerHTML='';
+    splfBulkRowCount=0;
+    for(let i=0;i<3;i++) addSplitFriendBulkRow();
+    updateSplitFriendBulkCount();
+    setTimeout(()=>{ const first=document.querySelector('.splf-bulk-input'); if(first)first.focus(); },100);
+  }
+  document.getElementById('m-splitfriend').classList.add('open');
+}
+function addSplitFriendBulkRow(){
+  const container=document.getElementById('splf-bulk-rows');
+  const rowId=++splfBulkRowCount;
+  const div=document.createElement('div');
+  div.id='splf-bulk-row-'+rowId;
+  div.style.cssText='display:flex;align-items:center;gap:8px;';
+  div.innerHTML=`
+    <div style="width:8px;height:8px;border-radius:50%;background:#6366f1;flex-shrink:0;"></div>
+    <input type="text" class="splf-bulk-input" placeholder="Friend's name"
+      style="flex:1;padding:9px 12px;border-radius:10px;background:rgba(255,255,255,0.7);border:1.5px solid rgba(200,200,200,0.12);color:var(--ink);font-size:13px;font-family:var(--font);outline:none;transition:border-color 0.18s;"
+      onkeydown="splfBulkKeyNav(event,${rowId})"
+      oninput="updateSplitFriendBulkCount()"
+      onfocus="this.style.borderColor='var(--blue)'"
+      onblur="this.style.borderColor='rgba(200,200,200,0.12)'">
+    <button onclick="removeSplitFriendBulkRow(${rowId})"
+      style="background:none;border:none;color:var(--muted-2);cursor:pointer;font-size:16px;padding:4px 6px;border-radius:6px;transition:all 0.15s;flex-shrink:0;"
+      onmouseover="this.style.color='var(--red)';this.style.background='var(--red-soft)'"
+      onmouseout="this.style.color='var(--muted-2)';this.style.background='none'"
+      title="Remove row">✕</button>`;
+  container.appendChild(div);
+  updateSplitFriendBulkCount();
+}
+function removeSplitFriendBulkRow(rowId){
+  const row=document.getElementById('splf-bulk-row-'+rowId);
+  if(row) row.remove();
+  updateSplitFriendBulkCount();
+}
+function splfBulkKeyNav(e,rowId){
+  if(e.key==='Enter' || e.key==='Tab'){
+    e.preventDefault();
+    const inputs=Array.from(document.querySelectorAll('.splf-bulk-input'));
+    const idx=inputs.findIndex(i=>i.closest('#splf-bulk-row-'+rowId));
+    if(idx<inputs.length-1){
+      inputs[idx+1].focus();
+    } else {
+      addSplitFriendBulkRow();
+      setTimeout(()=>{
+        const all=document.querySelectorAll('.splf-bulk-input');
+        all[all.length-1].focus();
+      },30);
+    }
+  }
+}
+function updateSplitFriendBulkCount(){
+  const filled=Array.from(document.querySelectorAll('.splf-bulk-input')).filter(i=>i.value.trim()).length;
+  const el=document.getElementById('splf-bulk-count');
+  if(el) el.textContent = filled>0 ? filled+' friend'+(filled===1?'':'s')+' ready to add' : '';
+}
+function saveSplitFriendsBulk(){
+  const inputs=Array.from(document.querySelectorAll('.splf-bulk-input'));
+  const names=inputs.map(i=>i.value.trim()).filter(n=>n.length>0);
+  const unique=[...new Set(names.map(n=>n.toLowerCase()))].map(low=>names.find(n=>n.toLowerCase()===low));
+  if(!unique.length){ toast('Enter at least one friend name','red'); return; }
+  const existing=S.splitFriends.map(f=>f.name.toLowerCase());
+  const toAdd=unique.filter(n=>!existing.includes(n.toLowerCase()));
+  const skipped=unique.length-toAdd.length;
+  toAdd.forEach(name=>{ S.splitFriends.push({id:S.nSplitFriend++,name}); });
+  saveData();
+  closeModal('splitfriend');
+  renderSplits();
+  const msg=toAdd.length+' friend'+(toAdd.length===1?'':'s')+' added'+(skipped>0?' ('+skipped+' duplicates skipped)':'');
+  toast(msg);
+}
 function saveSplitFriend(){
   const name=document.getElementById('splf-name').value.trim();
   if(!name){toast('Enter a name','red');return;}
@@ -3882,8 +4251,301 @@ function renderSplits(){
   if(cs) cs.textContent = `${S.splitExpenses.length} expense${S.splitExpenses.length!==1?'s':''}`;
 }
 
-// ── CATEGORIES — full edit support ──
-let editCatId=null;
+// ══════════════════════════════════════
+// PROJECT PLANNING — projected vs actual cost tracker
+// ══════════════════════════════════════
+
+function ensureCurrentProjectId(){
+  if(currentProjectId && S.projects.find(p=>p.id===currentProjectId)) return currentProjectId;
+  currentProjectId = S.projects.length ? S.projects[0].id : null;
+  return currentProjectId;
+}
+
+// ── Custom project picker dropdown ──
+function toggleProjectDropdown(){
+  const dd=document.getElementById('ppProjDropdown');
+  if(!dd) return;
+  if(!S.projects.length){
+    if(confirm('You have no projects yet. Create one now?')) openModal('projectgroup');
+    return;
+  }
+  dd.classList.toggle('open');
+}
+function closeProjectDropdown(){
+  document.getElementById('ppProjDropdown')?.classList.remove('open');
+}
+function selectProject(id){
+  currentProjectId = id;
+  closeProjectDropdown();
+  renderProjects();
+}
+document.addEventListener('click',function(e){
+  const dd=document.getElementById('ppProjDropdown');
+  if(dd && !dd.contains(e.target)) dd.classList.remove('open');
+});
+
+function fillProjectSelect(){
+  const btn=document.getElementById('pp-proj-btn-label');
+  const panel=document.getElementById('pp-proj-panel');
+  if(!btn||!panel) return;
+  ensureCurrentProjectId();
+  if(!S.projects.length){
+    btn.textContent='No projects yet';
+    panel.innerHTML = `<button type="button" class="pp-proj-add" onclick="closeProjectDropdown();openModal('projectgroup')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Project
+    </button>`;
+    return;
+  }
+  const current=S.projects.find(p=>p.id===currentProjectId);
+  btn.textContent = current ? current.name : 'Select a project';
+  panel.innerHTML = S.projects.map(p=>`
+    <button type="button" class="pp-proj-opt${p.id===currentProjectId?' sel':''}" onclick="selectProject(${p.id})">
+      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtmlPwd(p.name)}</span>
+      <span class="pp-proj-opt-edit" onclick="event.stopPropagation();closeProjectDropdown();openModal('projectgroup',${p.id})" title="Rename or delete">✏</span>
+    </button>
+  `).join('') + `<div class="pp-proj-divider"></div>
+    <button type="button" class="pp-proj-add" onclick="closeProjectDropdown();openModal('projectgroup')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Project
+    </button>`;
+}
+
+// ── Project group CRUD ──
+function saveProjectGroup(){
+  const name=document.getElementById('ppg-name').value.trim();
+  if(!name){toast('Enter a project name','red');return;}
+  if(editProjectGroupId){
+    const p=S.projects.find(x=>x.id===editProjectGroupId);
+    p.name=name;
+    saveData();toast('Project updated');
+  } else {
+    const p={id:S.nProject++,name};
+    S.projects.push(p);
+    currentProjectId=p.id;
+    saveData();toast('Project created');
+  }
+  closeModal('projectgroup');renderProjects();
+}
+function delProjectGroupFromModal(){
+  if(!confirm('Delete this project and all its line items? This cannot be undone.'))return;
+  S.projectItems=S.projectItems.filter(i=>i.projectId!==editProjectGroupId);
+  S.projects=S.projects.filter(p=>p.id!==editProjectGroupId);
+  currentProjectId=null;
+  closeModal('projectgroup');renderProjects();saveData();toast('Project removed');
+}
+
+// ── Project item — single edit mode ──
+function onProjItemAmountsChange(){
+  const proj=parseFloat(document.getElementById('ppi-projected').value)||0;
+  const act=parseFloat(document.getElementById('ppi-actual').value)||0;
+  const hasActual=document.getElementById('ppi-actual').value.trim()!=='';
+  const diff=hasActual?(act-proj):0;
+  const el=document.getElementById('ppi-diff-preview');
+  if(!hasActual){ el.textContent='₹'+fmt(0)+' (no actual amount yet)'; el.style.color='var(--ink)'; return; }
+  el.textContent=(diff>=0?'+₹':'-₹')+fmt(Math.abs(diff))+(diff>0?' over budget':(diff<0?' under budget':' — on budget'));
+  el.style.color = diff>0 ? '#DC2626' : (diff<0 ? '#16A34A' : 'var(--ink)');
+}
+function saveProjectItem(){
+  if(!ensureCurrentProjectId()){toast('Create a project first','red');return;}
+  const name=document.getElementById('ppi-name').value.trim();
+  const projected=parseFloat(document.getElementById('ppi-projected').value)||0;
+  const actualRaw=document.getElementById('ppi-actual').value;
+  const actual=actualRaw.trim()===''?0:(parseFloat(actualRaw)||0);
+  if(!name){toast('Enter an item name','red');return;}
+  if(editProjectItemId){
+    const it=S.projectItems.find(x=>x.id===editProjectItemId);
+    it.name=name;it.projected=projected;it.actual=actual;
+    saveData();toast('Item updated');
+  } else {
+    S.projectItems.push({id:S.nProjectItem++,projectId:currentProjectId,name,projected,actual});
+    saveData();toast('Item added');
+  }
+  closeModal('projectitem');renderProjects();
+}
+function delProjectItemFromModal(){
+  if(!confirm('Delete this line item?'))return;
+  S.projectItems=S.projectItems.filter(i=>i.id!==editProjectItemId);
+  closeModal('projectitem');renderProjects();saveData();toast('Item removed');
+}
+function delProjectItemDirect(id){
+  if(!confirm('Delete this line item?'))return;
+  S.projectItems=S.projectItems.filter(i=>i.id!==id);
+  renderProjects();saveData();toast('Item removed');
+}
+
+// ── Project item — bulk add mode ──
+let ppiBulkRowCount=0;
+function openProjectItemModal(id){
+  editProjectItemId = id || null;
+  if(id){
+    document.getElementById('ppi-edit-mode').style.display='block';
+    document.getElementById('ppi-add-mode').style.display='none';
+    document.getElementById('m-ppi-title').textContent='Edit Item';
+    document.getElementById('ppi-del-btn').style.display='inline-flex';
+    const it=S.projectItems.find(x=>x.id===id);
+    document.getElementById('ppi-name').value=it.name;
+    document.getElementById('ppi-projected').value=it.projected;
+    document.getElementById('ppi-actual').value=it.actual||'';
+    onProjItemAmountsChange();
+  } else {
+    if(!ensureCurrentProjectId()){
+      if(confirm('You need a project first. Create one now?')) openModal('projectgroup');
+      return;
+    }
+    document.getElementById('ppi-edit-mode').style.display='none';
+    document.getElementById('ppi-add-mode').style.display='block';
+    document.getElementById('m-ppi-title').textContent='Add Items';
+    const rowsEl=document.getElementById('ppi-bulk-rows');
+    rowsEl.innerHTML='';
+    ppiBulkRowCount=0;
+    for(let i=0;i<3;i++) addProjItemBulkRow();
+    updateProjItemBulkCount();
+    setTimeout(()=>{ const first=document.querySelector('.ppi-bulk-name'); if(first)first.focus(); },100);
+  }
+  document.getElementById('m-projectitem').classList.add('open');
+}
+function addProjItemBulkRow(){
+  const container=document.getElementById('ppi-bulk-rows');
+  const rowId=++ppiBulkRowCount;
+  const div=document.createElement('div');
+  div.id='ppi-bulk-row-'+rowId;
+  div.style.cssText='display:grid;grid-template-columns:1fr 120px 120px 28px;gap:8px;align-items:center;';
+  div.innerHTML=`
+    <input type="text" class="ppi-bulk-name" placeholder="e.g. Aquarium tank"
+      style="padding:9px 12px;border-radius:10px;background:rgba(255,255,255,0.7);border:1.5px solid rgba(200,200,200,0.12);color:var(--ink);font-size:13px;font-family:var(--font);outline:none;transition:border-color 0.18s;"
+      onkeydown="ppiBulkKeyNav(event,${rowId})"
+      oninput="updateProjItemBulkCount()"
+      onfocus="this.style.borderColor='var(--blue)'"
+      onblur="this.style.borderColor='rgba(200,200,200,0.12)'">
+    <input type="number" class="ppi-bulk-projected" placeholder="0" min="0" step="0.01"
+      style="padding:9px 10px;border-radius:10px;background:rgba(255,255,255,0.7);border:1.5px solid rgba(200,200,200,0.12);color:var(--ink);font-size:13px;font-family:var(--font);outline:none;transition:border-color 0.18s;"
+      onfocus="this.style.borderColor='var(--blue)'"
+      onblur="this.style.borderColor='rgba(200,200,200,0.12)'">
+    <input type="number" class="ppi-bulk-actual" placeholder="0" min="0" step="0.01"
+      style="padding:9px 10px;border-radius:10px;background:rgba(255,255,255,0.7);border:1.5px solid rgba(200,200,200,0.12);color:var(--ink);font-size:13px;font-family:var(--font);outline:none;transition:border-color 0.18s;"
+      onfocus="this.style.borderColor='var(--blue)'"
+      onblur="this.style.borderColor='rgba(200,200,200,0.12)'">
+    <button onclick="removeProjItemBulkRow(${rowId})"
+      style="background:none;border:none;color:var(--muted-2);cursor:pointer;font-size:16px;padding:4px 6px;border-radius:6px;transition:all 0.15s;flex-shrink:0;"
+      onmouseover="this.style.color='var(--red)';this.style.background='var(--red-soft)'"
+      onmouseout="this.style.color='var(--muted-2)';this.style.background='none'"
+      title="Remove row">✕</button>`;
+  container.appendChild(div);
+  updateProjItemBulkCount();
+}
+function removeProjItemBulkRow(rowId){
+  const row=document.getElementById('ppi-bulk-row-'+rowId);
+  if(row) row.remove();
+  updateProjItemBulkCount();
+}
+function ppiBulkKeyNav(e,rowId){
+  if(e.key==='Enter' || e.key==='Tab'){
+    e.preventDefault();
+    const names=Array.from(document.querySelectorAll('.ppi-bulk-name'));
+    const idx=names.findIndex(i=>i.closest('#ppi-bulk-row-'+rowId));
+    if(idx<names.length-1){
+      names[idx+1].focus();
+    } else {
+      addProjItemBulkRow();
+      setTimeout(()=>{
+        const all=document.querySelectorAll('.ppi-bulk-name');
+        all[all.length-1].focus();
+      },30);
+    }
+  }
+}
+function updateProjItemBulkCount(){
+  const filled=Array.from(document.querySelectorAll('.ppi-bulk-name')).filter(i=>i.value.trim()).length;
+  const el=document.getElementById('ppi-bulk-count');
+  if(el) el.textContent = filled>0 ? filled+' item'+(filled===1?'':'s')+' ready to add' : '';
+}
+function saveProjItemsBulk(){
+  if(!ensureCurrentProjectId()){toast('Create a project first','red');return;}
+  const rows=Array.from(document.querySelectorAll('#ppi-bulk-rows > div'));
+  const toAdd=[];
+  rows.forEach(row=>{
+    const name=row.querySelector('.ppi-bulk-name').value.trim();
+    if(!name) return;
+    const projRaw=row.querySelector('.ppi-bulk-projected').value;
+    const actRaw=row.querySelector('.ppi-bulk-actual').value;
+    const projected=parseFloat(projRaw)||0;
+    const actual=actRaw.trim()===''?0:(parseFloat(actRaw)||0);
+    toAdd.push({name,projected,actual});
+  });
+  if(!toAdd.length){ toast('Enter at least one item name','red'); return; }
+  toAdd.forEach(it=>{
+    S.projectItems.push({id:S.nProjectItem++,projectId:currentProjectId,name:it.name,projected:it.projected,actual:it.actual});
+  });
+  saveData();
+  closeModal('projectitem');
+  renderProjects();
+  toast(toAdd.length+' item'+(toAdd.length===1?'':'s')+' added');
+}
+
+function addProjectItemGuarded(){
+  if(!S.projects.length){
+    if(confirm('You need a project first. Create one now?')) openModal('projectgroup');
+    return;
+  }
+  openModal('projectitem');
+}
+
+// ── Render ──
+function renderProjects(){
+  const body=document.getElementById('pp-items-body');
+  if(!body) return;
+  fillProjectSelect();
+  ensureCurrentProjectId();
+
+  const items = currentProjectId ? S.projectItems.filter(i=>i.projectId===currentProjectId) : [];
+
+  if(!S.projects.length){
+    body.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">No projects yet. Click "+ New Project" to start planning one (e.g. an aquarium build, a bike restoration).</td></tr>`;
+  } else if(!items.length){
+    body.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">No items yet. Click "+ Add Item" to add your first projected cost — you can add several at once.</td></tr>`;
+  } else {
+    body.innerHTML = items.map(it=>{
+      const diff = it.actual - it.projected;
+      const diffColor = diff>0 ? '#DC2626' : (diff<0 ? '#16A34A' : 'var(--muted)');
+      const diffDisplay = it.actual ? (diff>=0?'+₹':'-₹')+fmt(Math.abs(diff)) : '—';
+      return `<tr onclick="openModal('projectitem',${it.id})" style="cursor:pointer;">
+        <td>${escHtmlPwd(it.name)}</td>
+        <td class="num">₹${fmt(it.projected)}</td>
+        <td class="num">${it.actual ? '₹'+fmt(it.actual) : '<span style="color:var(--muted);">—</span>'}</td>
+        <td class="num" style="color:${diffColor};font-weight:600;">${diffDisplay}</td>
+        <td class="td-del"><button class="acc-action-btn del" onclick="event.stopPropagation();delProjectItemDirect(${it.id})" title="Delete">Del</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  const totalProjected = items.reduce((s,i)=>s+i.projected,0);
+  const totalActual = items.reduce((s,i)=>s+i.actual,0);
+  const totalDiff = totalActual - totalProjected;
+  const anyActual = items.some(i=>i.actual>0);
+
+  document.getElementById('pp-foot-projected').textContent = '₹'+fmt(totalProjected);
+  document.getElementById('pp-foot-actual').textContent = anyActual ? '₹'+fmt(totalActual) : '—';
+  document.getElementById('pp-foot-diff').textContent = anyActual ? (totalDiff>=0?'+₹':'-₹')+fmt(Math.abs(totalDiff)) : '—';
+
+  document.getElementById('pp-projected-total').textContent = '₹'+fmt(totalProjected);
+  document.getElementById('pp-actual-total').textContent = anyActual ? '₹'+fmt(totalActual) : '₹0';
+  const diffEl=document.getElementById('pp-diff-total');
+  const diffStripe=document.getElementById('pp-diff-stripe');
+  const diffSub=document.getElementById('pp-diff-sub');
+  if(!anyActual){
+    diffEl.textContent='₹0';
+    diffSub.textContent='Add actual amounts to compare';
+    diffStripe.style.background='linear-gradient(90deg,#8A969E,#c6dcd8)';
+  } else {
+    diffEl.textContent=(totalDiff>=0?'+₹':'-₹')+fmt(Math.abs(totalDiff));
+    diffSub.textContent = totalDiff>0 ? 'Over the projected budget' : (totalDiff<0 ? 'Under the projected budget' : 'Exactly on budget');
+    diffStripe.style.background = totalDiff>0 ? 'linear-gradient(90deg,#DC2626,#ef4444)' : (totalDiff<0 ? 'linear-gradient(90deg,#16A34A,#22c55e)' : 'linear-gradient(90deg,#6366f1,#818cf8)');
+  }
+
+  const itemCs=document.getElementById('pp-item-cs');
+  if(itemCs) itemCs.textContent = `${items.length} item${items.length!==1?'s':''}`;
+}
 
 // ── CATEGORIES — bulk add + single edit ──
 let bulkCatType = 'expense';
@@ -4092,6 +4754,17 @@ function toggleMobileNav(){
 function closeMobileNav(){
   document.getElementById('mainNav').classList.remove('mobile-open');
 }
+function toggleQuickMenu(e){
+  if(e) e.stopPropagation();
+  document.getElementById('qmDropdown').classList.toggle('open');
+}
+function closeQuickMenu(){
+  document.getElementById('qmDropdown').classList.remove('open');
+}
+document.addEventListener('click',function(e){
+  const dd=document.getElementById('qmDropdown');
+  if(dd && !dd.contains(e.target)) dd.classList.remove('open');
+});
 function togglePrivacy(){
   const isOn=document.body.classList.toggle('privacy-on');
   localStorage.setItem('ft-privacy', isOn?'1':'0');
@@ -4424,11 +5097,15 @@ function setCycleModeUI(mode){
   if(mode==='calendar'){
     document.getElementById('cycle-day-input').value=1;
     document.getElementById('cycle-end-input').value=0;
+    refreshSelectWidget('cycle-day-input');
+    refreshSelectWidget('cycle-end-input');
     document.getElementById('cycle-vary-toggle').checked=false;
     onCycleVaryToggle();
   } else {
     if(document.getElementById('cycle-day-input').value==='1') document.getElementById('cycle-day-input').value=28;
     if(document.getElementById('cycle-end-input').value==='0') document.getElementById('cycle-end-input').value=27;
+    refreshSelectWidget('cycle-day-input');
+    refreshSelectWidget('cycle-end-input');
   }
   updateCyclePreview();
 }
@@ -4450,12 +5127,12 @@ function buildCycleMonthRows(){
     return `<tr style="border-top:1px solid rgba(200,200,200,0.08);">
       <td style="padding:7px 12px;color:var(--ink);font-weight:600;">${name}</td>
       <td style="padding:7px 12px;">
-        <select data-cyc-row-start="${m}" onchange="updateCyclePreview()" class="cyc-select" style="font-size:12.5px;padding:6px 26px 6px 10px;">
+        <select data-cyc-row-start="${m}" onchange="updateCyclePreview()" class="cyc-select" style="font-size:12.5px;">
           ${dayOptionsHtml(false)}
         </select>
       </td>
       <td style="padding:7px 12px;">
-        <select data-cyc-row-end="${m}" onchange="updateCyclePreview()" class="cyc-select" style="font-size:12.5px;padding:6px 26px 6px 10px;">
+        <select data-cyc-row-end="${m}" onchange="updateCyclePreview()" class="cyc-select" style="font-size:12.5px;">
           ${dayOptionsHtml(true)}
         </select>
       </td>
@@ -4463,8 +5140,10 @@ function buildCycleMonthRows(){
   }).join('');
   CYCLE_MONTH_NAMES.forEach((_,i)=>{
     const m=i+1; const cfg=byMonth[m]||{start:fallbackStart,end:fallbackEnd};
-    tbody.querySelector(`[data-cyc-row-start="${m}"]`).value=cfg.start;
-    tbody.querySelector(`[data-cyc-row-end="${m}"]`).value=cfg.end;
+    const sSel=tbody.querySelector(`[data-cyc-row-start="${m}"]`), eSel=tbody.querySelector(`[data-cyc-row-end="${m}"]`);
+    sSel.value=cfg.start; eSel.value=cfg.end;
+    enhanceSelect(sSel); enhanceSelect(eSel);
+    refreshSelectWidget(sSel); refreshSelectWidget(eSel);
   });
 }
 function copyCycleRowToAll(fromMonth){
@@ -4474,7 +5153,8 @@ function copyCycleRowToAll(fromMonth){
   CYCLE_MONTH_NAMES.forEach((_,i)=>{
     const m=i+1;
     const sSel=document.querySelector(`[data-cyc-row-start="${m}"]`), eSel=document.querySelector(`[data-cyc-row-end="${m}"]`);
-    if(sSel) sSel.value=sVal; if(eSel) eSel.value=eVal;
+    if(sSel){ sSel.value=sVal; refreshSelectWidget(sSel); }
+    if(eSel){ eSel.value=eVal; refreshSelectWidget(eSel); }
   });
   updateCyclePreview();
   toast('Copied to all months');
@@ -4494,6 +5174,8 @@ function openCycleSettings(){
   if(endSel && !endSel.options.length) endSel.innerHTML=dayOptionsHtml(true);
   sel.value=getCycleStartDay();
   endSel.value=getCycleEndDay();
+  refreshSelectWidget(sel);
+  refreshSelectWidget(endSel);
   const vary=!!(S.settings&&S.settings.cycleVaryByMonth);
   document.getElementById('cycle-vary-toggle').checked=vary;
   document.getElementById('cycle-single-fields').style.display = vary?'none':'grid';
@@ -4568,6 +5250,7 @@ function initBgtViewSelectors(){
     ySel.innerHTML=years.map(y=>`<option value="${y}">${y}</option>`).join('');
     const [cy,cm]=currentCycleKey().split('-');
     mSel.value=+cm;ySel.value=+cy;
+    refreshSelectWidget(mSel);refreshSelectWidget(ySel);
   }
 }
 function bgtViewInfo(){
@@ -4722,6 +5405,7 @@ function pushMasterPeriodToMst(){
     const m=document.getElementById('mst-month'), y=document.getElementById('mst-year');
     if(m) m.value=masterPeriod.month;
     if(y) y.value=masterPeriod.year;
+    refreshSelectWidget(m);refreshSelectWidget(y);
   }
   syncDrChip('mst-from','mst-from-disp'); syncDrChip('mst-to','mst-to-disp');
 }
@@ -4740,6 +5424,7 @@ function pushMasterPeriodToBudgets(){
     const m=document.getElementById('bgt-view-month'), y=document.getElementById('bgt-view-year');
     if(m) m.value=masterPeriod.month;
     if(y) y.value=masterPeriod.year;
+    refreshSelectWidget(m);refreshSelectWidget(y);
   }
   renderBudgets();
 }
@@ -4771,6 +5456,7 @@ function pushMasterPeriodToMbl(){
     const m=document.getElementById('mbl-month'), y=document.getElementById('mbl-year');
     if(m) m.value=masterPeriod.month;
     if(y) y.value=masterPeriod.year;
+    refreshSelectWidget(m);refreshSelectWidget(y);
   }
   renderMonthlyLookup();
 }
@@ -5210,7 +5896,7 @@ function onBulkDefaultAccChange(){
   // Only update rows the user hasn't manually changed away from the previous default
   const newDef = parseInt(document.getElementById('tb-acc-default').value);
   document.querySelectorAll('.btr-acc').forEach(sel=>{
-    if(sel.dataset.touched!=='1') sel.value = newDef;
+    if(sel.dataset.touched!=='1'){ sel.value = newDef; refreshSelectWidget(sel); }
   });
 }
 function addBulkTxnRow(){
@@ -5332,6 +6018,7 @@ function initTransfer(){
   const opts = S.accounts.map(a=>`<option value="${a.id}">${a.name} (₹${fmt(a.balance)})</option>`).join('');
   sel1.innerHTML=opts; sel2.innerHTML=opts;
   if(S.accounts.length>1) sel2.selectedIndex=1;
+  refreshSelectWidget(sel1); refreshSelectWidget(sel2);
   document.getElementById('tr-date').value=new Date().toISOString().split('T')[0];
 }
 function checkTransferBalance(){
@@ -6066,11 +6753,13 @@ function populateBgtTrendSelect(){
   const prevVal=sel.value;
   if(!S.budgets.length){
     sel.innerHTML='<option value="">No budgets yet</option>';
+    refreshSelectWidget(sel);
     killChart('bgt-trend');
     return;
   }
   sel.innerHTML=S.budgets.map(b=>`<option value="${b.id}">${budgetCatNames(b)}</option>`).join('');
   if(prevVal && S.budgets.some(b=>String(b.id)===prevVal)) sel.value=prevVal;
+  refreshSelectWidget(sel);
   renderBgtTrendChart();
 }
 function renderBgtTrendChart(){
@@ -6479,8 +7168,10 @@ function goToBiMapStep(){
   const debitIdx=findCol(['debit','withdrawal','dr amount','dr']); if(debitIdx>=0) document.getElementById('bi-col-debit').value=debitIdx;
   const creditIdx=findCol(['credit','deposit','cr amount','cr']); if(creditIdx>=0) document.getElementById('bi-col-credit').value=creditIdx;
   const amtIdx=findCol(['amount']); if(amtIdx>=0) document.getElementById('bi-col-amount').value=amtIdx;
+  ['bi-col-date','bi-col-desc','bi-col-debit','bi-col-credit','bi-col-amount'].forEach(id=>refreshSelectWidget(id));
   const accSel=document.getElementById('bi-account');
   accSel.innerHTML = S.accounts.map(a=>`<option value="${a.id}">${a.name}</option>`).join('');
+  refreshSelectWidget(accSel);
   document.getElementById('bi-step-header').style.display='none';
   document.getElementById('bi-step-map').style.display='block';
 }
@@ -6549,7 +7240,7 @@ function biCatSelectHtml(row,idx){
   const cats=S.categories.filter(c=>c.type===row.type);
   const opts=cats.map(c=>`<option value="${c.id}" ${c.id===row.catId?'selected':''}>${c.name}</option>`).join('');
   const newOpt = (!row.catId && row.catName) ? `<option value="__new__" selected>${row.catName} (new)</option>` : '';
-  return `<select onchange="BI.parsed[${idx}].catId=this.value==='__new__'?null:parseInt(this.value);BI.parsed[${idx}].catName=this.options[this.selectedIndex].text.replace(' (new)','');" style="width:100%;padding:6px 8px;border-radius:8px;border:1.5px solid rgba(200,200,200,0.14);background:rgba(255,255,255,0.06);color:var(--ink);font-size:12px;font-family:var(--font);">
+  return `<select onchange="BI.parsed[${idx}].catId=this.value==='__new__'?null:parseInt(this.value);BI.parsed[${idx}].catName=this.options[this.selectedIndex].text.replace(' (new)','');" class="select-glass-sm" style="width:100%;font-size:12px;">
     <option value="">-- Uncategorized --</option>${newOpt}${opts}
   </select>`;
 }
@@ -7431,6 +8122,152 @@ function formatAiText(text){
 function escHtml(t){
   return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
+
+// ══════════════════════════════════════════════════════════════
+// CUSTOM DROPDOWN ENGINE
+// Wraps a native <select> with a glass-panel widget matching the
+// Project Planning picker (checkmark, hover rows, blur panel),
+// while the underlying <select> stays live in the DOM so every
+// existing onchange/.value/.innerHTML-based line of code keeps
+// working untouched. The widget mirrors the select; it never
+// replaces it as the source of truth.
+// ══════════════════════════════════════════════════════════════
+const CDD_REGISTRY = new WeakMap(); // select element -> widget controller
+
+function enhanceSelect(select){
+  if(!select || select.tagName!=='SELECT') return null;
+  if(CDD_REGISTRY.has(select)) return CDD_REGISTRY.get(select);
+
+  // Wrapper takes the select's place in the layout; select itself is hidden but functional.
+  const wrapper=document.createElement('div');
+  wrapper.className='cdd-wrap';
+  if(select.classList.contains('btn')||select.classList.contains('btn-ghost')) wrapper.classList.add('cdd-pill');
+  else if(select.classList.contains('cyc-select')) wrapper.classList.add('cdd-cycle');
+  else if(select.classList.contains('select-glass-sm')) wrapper.classList.add('cdd-sm');
+  if(select.hasAttribute('data-cdd-size')) wrapper.classList.add('cdd-'+select.getAttribute('data-cdd-size'));
+  select.parentNode.insertBefore(wrapper,select);
+  wrapper.appendChild(select);
+  select.classList.add('cdd-native');
+
+  const btn=document.createElement('button');
+  btn.type='button';
+  btn.className='cdd-btn';
+  if(select.disabled) btn.disabled=true;
+  const btnLabel=document.createElement('span');
+  btnLabel.className='cdd-btn-label';
+  const chev=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  chev.setAttribute('viewBox','0 0 24 24');
+  chev.setAttribute('fill','none');
+  chev.setAttribute('stroke','currentColor');
+  chev.setAttribute('stroke-width','2.5');
+  chev.setAttribute('class','cdd-chev');
+  chev.innerHTML='<polyline points="6 9 12 15 18 9"/>';
+  btn.appendChild(btnLabel);
+  btn.appendChild(chev);
+
+  const panel=document.createElement('div');
+  panel.className='cdd-panel';
+
+  wrapper.appendChild(btn);
+  wrapper.appendChild(panel);
+
+  function buildPanel(){
+    const opts=Array.from(select.options);
+    panel.innerHTML='';
+    opts.forEach((o)=>{
+      const row=document.createElement('button');
+      row.type='button';
+      row.className='cdd-opt'+(o.selected?' sel':'')+(o.disabled?' disabled':'');
+      row.textContent=o.text;
+      row.disabled=o.disabled;
+      if(o.disabled && o.value===''){ row.classList.add('cdd-placeholder'); }
+      row.addEventListener('click',(e)=>{
+        e.stopPropagation();
+        if(o.disabled) return;
+        select.value=o.value;
+        select.dispatchEvent(new Event('change',{bubbles:true}));
+        refreshWidget();
+        closePanel();
+      });
+      panel.appendChild(row);
+    });
+  }
+  function refreshLabel(){
+    const sel=select.options[select.selectedIndex];
+    btnLabel.textContent = sel ? sel.text : '';
+  }
+  function refreshWidget(){
+    buildPanel();
+    refreshLabel();
+    btn.disabled=select.disabled;
+    btn.classList.toggle('cdd-disabled',select.disabled);
+  }
+  function openPanel(){
+    if(select.disabled) return;
+    document.querySelectorAll('.cdd-wrap.open').forEach(w=>{ if(w!==wrapper) w.classList.remove('open'); });
+    refreshWidget();
+    wrapper.classList.add('open');
+    // keep panel on-screen if near viewport bottom or right edge
+    requestAnimationFrame(()=>{
+      panel.classList.remove('cdd-panel-up','cdd-panel-right');
+      const r=panel.getBoundingClientRect();
+      if(r.bottom>window.innerHeight-8){ panel.classList.add('cdd-panel-up'); }
+      if(r.right>window.innerWidth-8){ panel.classList.add('cdd-panel-right'); }
+    });
+  }
+  function closePanel(){ wrapper.classList.remove('open'); }
+  function togglePanel(e){
+    e.stopPropagation();
+    if(wrapper.classList.contains('open')) closePanel();
+    else openPanel();
+  }
+
+  btn.addEventListener('click',togglePanel);
+  document.addEventListener('click',(e)=>{
+    if(!wrapper.contains(e.target)) closePanel();
+  });
+
+  // Keep widget in sync whenever code rebuilds the select's options
+  // (bulk fills, bank-import mapping, account/category refresh, etc.)
+  const mo=new MutationObserver(()=>{ refreshWidget(); });
+  mo.observe(select,{childList:true,subtree:true,attributes:true,attributeFilter:['disabled']});
+
+  refreshWidget();
+
+  const controller={select,wrapper,btn,panel,refresh:refreshWidget,open:openPanel,close:closePanel};
+  CDD_REGISTRY.set(select,controller);
+  return controller;
+}
+
+function refreshSelectWidget(id){
+  const select = typeof id==='string' ? document.getElementById(id) : id;
+  if(!select) return;
+  const ctrl = CDD_REGISTRY.get(select);
+  if(ctrl) ctrl.refresh();
+  else enhanceSelect(select);
+}
+
+function enhanceAllSelects(root){
+  (root||document).querySelectorAll('select').forEach(s=>enhanceSelect(s));
+}
+
+// Auto-enhance any newly-added <select> anywhere in the app (covers
+// dynamically generated rows: bulk txn rows, cycle month rows, bank
+// import per-row category pickers) without needing per-callsite edits.
+const CDD_GLOBAL_OBSERVER = new MutationObserver((mutations)=>{
+  mutations.forEach(m=>{
+    m.addedNodes && m.addedNodes.forEach(node=>{
+      if(node.nodeType!==1) return;
+      if(node.tagName==='SELECT') enhanceSelect(node);
+      else if(node.querySelectorAll){ node.querySelectorAll('select').forEach(s=>enhanceSelect(s)); }
+    });
+  });
+});
+CDD_GLOBAL_OBSERVER.observe(document.body,{childList:true,subtree:true});
+
+document.addEventListener('DOMContentLoaded',()=>enhanceAllSelects());
+if(document.readyState==='complete' || document.readyState==='interactive'){ enhanceAllSelects(); }
+
 </script>
 
 <!-- ══════ FINTRACK AI ASSISTANT ══════ -->
@@ -7480,13 +8317,6 @@ function escHtml(t){
   </div>
 </div>
 
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
-  });
-}
-</script>
 </body>
 </html>
 
@@ -7647,7 +8477,7 @@ document.querySelectorAll('.modal-bg').forEach(bg => {
 /* ── PAGE TRANSITION liquid blur ── */
 const _origShowPage = window.showPage;
 if(typeof _origShowPage === 'function'){
-  window.showPage = function(page, btn){
+  window.showPage = function(page, btn, isQuickMenuItem){
     // Fade out current
     const current = document.querySelector('.page.active');
     if(current){
@@ -7656,14 +8486,14 @@ if(typeof _origShowPage === 'function'){
       setTimeout(() => {
         
         current.style.opacity = '';
-        _origShowPage(page, btn);
+        _origShowPage(page, btn, isQuickMenuItem);
         // After new page shows, animate KPIs
         if(page === 'dashboard') setTimeout(animateKpiGrid, 100);
         setTimeout(initCardTilt, 200);
         setTimeout(initGlassRipples, 200);
       }, 120);
     } else {
-      _origShowPage(page, btn);
+      _origShowPage(page, btn, isQuickMenuItem);
     }
   };
 }
